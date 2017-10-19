@@ -13,12 +13,13 @@ trigger_cell = 0
 # channel = 15
 channel = 15
 
-with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA']) as stream:
+with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA', 'SARFE10-PBPG050:HAMP-014-x-h1-DRS_TC']) as stream:
     while True:
         start = time.time()
         message = stream.receive()
         data = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-DATA'].value
         background = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA'].value
+
         pulse_id = message.data.pulse_id
 
         data -= background
