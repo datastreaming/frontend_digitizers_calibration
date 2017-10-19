@@ -21,12 +21,14 @@ with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAM
         background = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA'].value
         pulse_id = message.data.pulse_id
 
+        data -= background
         data = data.astype(numpy.float32)
 
         data = calibration_data.calibrate(data, trigger_cell, channel)
+
+        data = data.sum()
+
         elapsed = time.time() - start
+
         print(elapsed)
         print(data)
-
-
-
