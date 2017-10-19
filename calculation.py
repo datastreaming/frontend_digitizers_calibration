@@ -1,5 +1,6 @@
 
 from bsread import source
+import numpy
 
 
 from drs_vcal_tcal import tcal_class, vcal_class
@@ -17,6 +18,8 @@ with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAM
         data = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-DATA'].value
         background = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA'].value
         pulse_id = message.data.pulse_id
+
+        data = data.astype(numpy.float32)
 
         data = calibration_data.calibrate(data, trigger_cell, channel)
 
