@@ -15,7 +15,7 @@ channel = 15
 
 with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA']) as stream:
     while True:
-        start = time.time()
+        # start = time.time()
         message = stream.receive()
         data = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-DATA'].value
         background = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA'].value
@@ -28,7 +28,7 @@ with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAM
 
         data = data.sum()
 
-        elapsed = time.time() - start
+        # elapsed = time.time() - start
 
-        print(elapsed)
-        print(data)
+        # print(elapsed)
+        print(pulse_id, data)
