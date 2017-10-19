@@ -23,10 +23,13 @@ with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAM
 
         pulse_id = message.data.pulse_id
 
-        data -= background
+        background = background.astype(numpy.float32)
         data = data.astype(numpy.float32)
 
+        background = calibration_data.calibrate(background, trigger_cell, channel)
         data = calibration_data.calibrate(data, trigger_cell, channel)
+
+        data -= background
 
         data = data.sum()
 
