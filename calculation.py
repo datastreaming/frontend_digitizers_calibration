@@ -19,6 +19,7 @@ with source(channels=['SARFE10-PBPG050:HAMP-014-x-h1-DATA', 'SARFE10-PBPG050:HAM
         message = stream.receive()
         data = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-DATA'].value
         background = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-BG-DATA'].value
+        trigger_cell = message.data.data['SARFE10-PBPG050:HAMP-014-x-h1-DRS_TC'].value
 
         pulse_id = message.data.pulse_id
 
