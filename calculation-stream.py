@@ -2,10 +2,12 @@
 from bsread import source
 import numpy
 import time
+import epics
 
-
+from epics import caget, caput
 from drs_vcal_tcal import tcal_class, vcal_class
-calibration_data = vcal_class('comb006-5120.vcal')
+calibration_data = vcal_class('comb006-2498.vcal')
+tcalibration_data =  tcal_class('comb006-2498.tcal')
 
 
 # trigger_cell between 0 and 1023
@@ -22,6 +24,9 @@ with source(channels=['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA', 'SARFE10-CVME-PHO621
         data_trigger_cell = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-DRS_TC'].value
         background_trigger_cell = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DRS_TC'].value
 
+        print (data)
+        print (background)
+
         pulse_id = message.data.pulse_id
 
         background = background.astype(numpy.float32)
@@ -34,4 +39,6 @@ with source(channels=['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA', 'SARFE10-CVME-PHO621
 
         data = data.sum()
 
-        print(pulse_id, data)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY', data)
+
+        print (data, pulse_id)
