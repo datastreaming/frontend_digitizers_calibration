@@ -21,7 +21,7 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
     while True:
 
         message = stream.receive()
-
+# get data from stream
         data1 = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA'].value
         background1 = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA'].value
         data1_trigger_cell = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-DRS_TC'].value
@@ -44,18 +44,20 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
 
         pulse_id = message.data.pulse_id
 
-        background1 = background1.astype(numpy.float32)
-        data1 = data1.astype(numpy.float32)
+# offset and scaling
+        background1 = (background1.astype(numpy.float32)-0x800)/4096
+        data1 = (data1.astype(numpy.float32)-0x800)/4096
 
-        background2 = background2.astype(numpy.float32)
-        data2 = data2.astype(numpy.float32)
+        background2 = (background2.astype(numpy.float32)-0x800)/4096
+        data2 = (data2.astype(numpy.float32)-0x800)/4096
 
-        background3 = background3.astype(numpy.float32)
-        data3 = data3.astype(numpy.float32)
+        background3 = (background3.astype(numpy.float32)-0x800)/4096
+        data3 = (data3.astype(numpy.float32)-0x800)/4096
 
-        background4 = background4.astype(numpy.float32)
-        data4 = data4.astype(numpy.float32)
+        background4 = (background4.astype(numpy.float32)-0x800)/4096
+        data4 = (data4.astype(numpy.float32)-0x800)/4096
 
+# calibration
         background1 = calibration_data.calibrate(background1, background1_trigger_cell, channel1)
         data1 = calibration_data.calibrate(data1, data1_trigger_cell, channel1)
         caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-CALIBRATED',data1)
@@ -76,16 +78,19 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
         caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-CALIBRATED',data2)
         caput('SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA-CALIBRATED',background2)
 
+# background susbstracion
         data1 -= background1
         data2 -= background2
         data3 -= background3
         data4 -= background4
 
+# integration
         data1 = data1.sum()
         data2 = data2.sum()
         data3 = data3.sum()
         data4 = data4.sum()
  
+# intensity and position calculations
         intensity = (data1 + data2 + data3 + data4)/2
         position1 = (data1 - data2)/(data1 + data2)
         position2 = (data3 - data4)/(data3 + data4)
@@ -94,6 +99,4 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
         caput('SARFE10-PBPG050:HAMP-XPOS', position1)
         caput('SARFE10-PBPG050:HAMP-YPOS', position2)
 
-#        print(pulse_id, intensity)
-#        print(pulse_id, position1)
-#        print(pulse_id, position2)
+        print(pulse_id)
