@@ -70,13 +70,13 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
 
         background3 = calibration_data.calibrate(background3, background3_trigger_cell, channel3)
         data3 = calibration_data.calibrate(data3, data3_trigger_cell, channel3)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-CALIBRATED',data2)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DATA-CALIBRATED',background2)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-CALIBRATED',data3)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DATA-CALIBRATED',background3)
 
         background4 = calibration_data.calibrate(background4, background4_trigger_cell, channel4)
         data4 = calibration_data.calibrate(data4, data4_trigger_cell, channel4)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-CALIBRATED',data2)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA-CALIBRATED',background2)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-CALIBRATED',data4)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA-CALIBRATED',background4)
 
 # background susbstracion
         data1 -= background1
