@@ -1,5 +1,5 @@
-
 from bsread import source
+from collections import deque
 import numpy
 import time
 import epics
@@ -16,6 +16,7 @@ channel1 = 15
 channel2 = 14
 channel3 = 13
 channel4 = 12
+queue = deque(maxlen=240)
 
 with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
     while True:
@@ -86,17 +87,29 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
 
 # integration
         data1 = data1.sum()
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-SUM',data1)
         data2 = data2.sum()
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-SUM',data1)
         data3 = data3.sum()
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-SUM',data1)
         data4 = data4.sum()
- 
-# intensity and position calculations
-        intensity = (data1 + data2 + data3 + data4)/2
-        position1 = (data1 - data2)/(data1 + data2)
-        position2 = (data3 - data4)/(data3 + data4)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-SUM',data1)
 
-        caput('SARFE10-PBPG050:HAMP-INTENSITY', intensity)
+# intensity and position calculations
+        intensity = (data1 + data2 + data3 + data4)/(-2)
+#        position1 = ((data1 - data2)/(data1 + data2))
+        position1 = ((((data1 - data2)/(data1 + data2))-(-0.2115))/-0.0291)-0.4
+#        position2 = ((data3 - data4)/(data3 + data4))
+        position2 = ((((data3 - data4)/(data3 + data4))-(-0.1632))/0.0161)+0.2
+
         caput('SARFE10-PBPG050:HAMP-XPOS', position1)
         caput('SARFE10-PBPG050:HAMP-YPOS', position2)
 
+        caput('SARFE10-PBPG050:HAMP-INTENSITY', intensity)
+        queue.append(intensity)
+#        print(queue)
+        intensity_average = sum(queue)/len(queue)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY-AVG',intensity_average)
+#        print(intensity_sum)
+#        print(intensity_sum)
         print(pulse_id)
