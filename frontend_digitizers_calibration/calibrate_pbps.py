@@ -101,7 +101,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name):
 
         _logger.info("Using device name '%s'.", device_name)
 
-        with source(channels=channel_names) as input_stream:
+        with source(channels=dispatching_layer_request_channels) as input_stream:
             with sender(mode=PUB) as output_stream:
                 while True:
                     message = input_stream.receive()
