@@ -96,11 +96,11 @@ with source(channels=required_channels) as stream:
         data1 = data1.sum()
         caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-SUM', data1)
         data2 = data2.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-SUM', data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-SUM', data2)
         data3 = data3.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-SUM', data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-SUM', data3)
         data4 = data4.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-SUM', data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-SUM', data4)
 
 
 
