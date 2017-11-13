@@ -1,4 +1,6 @@
 from bsread import source
+from bsread.sender import sender, PUB
+
 from collections import deque
 import numpy
 
@@ -64,7 +66,7 @@ def process_message(message, channel_numbers, calibration_data, keithley_intensi
     return data_to_send
 
 
-def main():
+def main(update_epics=True):
 
     calibration_data = vcal_class('docker/cfg/comb006-2498.vcal')
     channel_numbers = [15, 14, 13, 12]
@@ -78,22 +80,29 @@ def main():
         required_channels.append("SARFE10-CVME-PHO6211:Lnk9Ch%d-BG-DRS_TC" % n)
 
     with source(channels=required_channels) as stream:
-        while True:
+        with sender(mode=PUB) as output_stream:
+            while True:
 
-            # scaling
-            intensity_ds = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-DS')
-            intensity_us = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-US')
-            keithley_intensity = (intensity_ds + intensity_us) / 2
+                # scaling
+                intensity_ds = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-DS')
+                intensity_us = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-US')
+                keithley_intensity = (intensity_ds + intensity_us) / 2
 
-            message = stream.receive()
-            pulse_id = message.data.pulse_id
+                message = stream.receive()
+                pulse_id = message.data.pulse_id
 
-            data_to_send = process_message(message, channel_numbers, calibration_data, keithley_intensity, queue)
+                data_to_send = process_message(message, channel_numbers, calibration_data, keithley_intensity, queue)
 
-            for key, value in data_to_send.items():
-                caput(key, value)
+                # Push results to epics
+                if update_epics:
+                    for key, value in data_to_send.items():
+                        caput(key, value)
 
-            print(pulse_id)
+                output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
+                                   pulse_id=message.data.pulse_id,
+                                   data=data_to_send)
+
+                print(pulse_id)
 
 
 if __name__ == '__main__':
