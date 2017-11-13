@@ -109,7 +109,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name):
 
                     _logger.debug("Message with pulse_id %s processed.", message.data.pulse_id)
 
-                    output_stream.debug(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
+                    output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
                                         pulse_id=message.data.pulse_id,
                                         data=data)
 
