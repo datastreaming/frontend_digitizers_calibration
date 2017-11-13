@@ -78,32 +78,30 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
 
 def start_stream(ioc_host, calibration_file, link_number, device_name, first_channel_number):
 
+    _logger.info("Using device name '%s'.", device_name)
+
     # Channel numbers can start at a random integer, of course.
     channel_mapping = []
     for i in range(4):
         channel_mapping.append(first_channel_number-i)
+    _logger.info("Using channel numbers ''%s.", channel_mapping)
 
     try:
         # Data to be used for calibration.
         _logger.info("Using calibration file '%s'.", calibration_file)
         calibration_data = vcal_class(calibration_file)
 
-        # Channels to read from epics.
+        # Channel prefixes to read from the dispatching layer.
         _logger.info("Generating PVs for ioc_host '%s'.", ioc_host)
-
-        channel_names = [ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[0]),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[1]),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[2]),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[3])]
+        channel_names = []
+        for channel_number in channel_mapping:
+            channel_names.append(ioc_host + IOC_PV_TEMPLATE % (link_number, channel_number))
 
         dispatching_layer_request_channels = []
         for channel in channel_names:
             for suffix in channel_suffixes.values():
                 dispatching_layer_request_channels.append(channel + suffix)
-
         _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
-
-        _logger.info("Using device name '%s'.", device_name)
 
         with source(channels=dispatching_layer_request_channels) as input_stream:
             with sender(mode=PUB) as output_stream:
@@ -116,13 +114,11 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
                                             channel_names=channel_names,
                                             device_name=device_name,
                                             first_channel_number=first_channel_number)
-
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 
                     output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
                                        pulse_id=message.data.pulse_id,
                                        data=data)
-
                     _logger.debug("Message with pulse_id '%s' sent out.", message.data.pulse_id)
 
     except KeyboardInterrupt:
