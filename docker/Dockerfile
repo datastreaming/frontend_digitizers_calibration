@@ -6,3 +6,4 @@ ENV CFG_DIR /cfg
 ADD cfg/ ${CFG_DIR}/
 
 ADD startup.sh /
+RUN chmod +x startup.sh
