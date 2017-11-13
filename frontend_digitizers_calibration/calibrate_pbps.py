@@ -140,17 +140,17 @@ def start_stream(ioc_host, calibration_file):
             with sender(mode=PUB) as output_stream:
                 while True:
                     message = input_stream.receive()
-                    _logger.debug("Received message with pulse_id %s.", message.data.pulse_id)
+                    _logger.info("Received message with pulse_id %s.", message.data.pulse_id)
 
                     data = process_messages(message, ioc_host, calibration_data)
 
-                    _logger.debug("Message with pulse_id %s processed.", message.data.pulse_id)
+                    _logger.info("Message with pulse_id %s processed.", message.data.pulse_id)
 
                     output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
                                        pulse_id=message.data.pulse_id,
                                        data=data)
 
-                    _logger.debug("Message with pulse_id %s sent out.", message.data.pulse_id)
+                    _logger.info("Message with pulse_id %s sent out.", message.data.pulse_id)
 
     except KeyboardInterrupt:
         _logger.info("Terminating due to user request.")
