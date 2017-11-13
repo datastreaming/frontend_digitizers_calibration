@@ -29,7 +29,7 @@ def notify_epics(data_to_send):
         caput(name, value)
 
 
-def process_messages(message, calibration_data, channel_names, device_name):
+def process_messages(message, calibration_data, channel_names, device_name, first_channel_number):
     data_to_send = {}
 
     for channel_name in channel_names:
@@ -44,8 +44,8 @@ def process_messages(message, calibration_data, channel_names, device_name):
         data = (data.astype(numpy.float32) - 0x800) / 4096
 
         # Calibrate
-        background = calibration_data.calibrate(background, background_trigger_cell, channel1)
-        data = calibration_data.calibrate(data, data_trigger_cell, channel1)
+        background = calibration_data.calibrate(background, background_trigger_cell, first_channel_number)
+        data = calibration_data.calibrate(data, data_trigger_cell, first_channel_number)
 
         # background subtraction
         data -= background
@@ -114,7 +114,8 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
                     data = process_messages(message=message,
                                             calibration_data=calibration_data,
                                             channel_names=channel_names,
-                                            device_name=device_name)
+                                            device_name=device_name,
+                                            first_channel_number=first_channel_number)
 
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 
