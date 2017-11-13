@@ -3,7 +3,7 @@ import logging
 import numpy
 
 from bsread import source
-from bsread.sender import sender
+from bsread.sender import sender, PUB
 from epics import caget, caput
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
@@ -137,7 +137,7 @@ def start_stream(ioc_host, calibration_file):
 
         calibration_data = vcal_class(calibration_file)
         with source(host=ioc_host, port=9999) as input_stream:
-            with sender() as output_stream:
+            with sender(mode=PUB) as output_stream:
                 while True:
                     message = input_stream.receive()
                     _logger.debug("Received message with pulse_id %s.", message.data.pulse_id)
