@@ -84,7 +84,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
     channel_mapping = []
     for i in range(4):
         channel_mapping.append(first_channel_number-i)
-    _logger.info("Using channel numbers ''%s.", channel_mapping)
+    _logger.info("Using channel numbers '%s'.", channel_mapping)
 
     try:
         # Data to be used for calibration.
