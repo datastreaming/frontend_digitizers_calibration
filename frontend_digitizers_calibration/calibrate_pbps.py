@@ -12,12 +12,10 @@ _logger = logging.getLogger(__name__)
 # Template to generate PV name
 IOC_PV_TEMPLATE = ':Lnk%dCh%d'
 
-channel1 = 15
-channel2 = 14
-channel3 = 13
-channel4 = 12
-
-channel_suffixes = ["-DATA", '-BG-DATA', '-DRS_TC', '-BG-DRS_TC']
+channel_suffixes = {"data": "-DATA",
+                    "bg_data": '-BG-DATA',
+                    "data_trigger": '-DRS_TC',
+                    "bg_data_trigger": '-BG-DRS_TC'}
 
 
 # TODO: We might want to remove this.
@@ -36,10 +34,10 @@ def process_messages(message, calibration_data, channel_names, device_name):
 
     for channel_name in channel_names:
         # Read from bsread message.
-        data = message.data.data[channel_name + "-DATA"].value
-        background = message.data.data[channel_name + '-BG-DATA'].value
-        data_trigger_cell = message.data.data[channel_name + '-DRS_TC'].value
-        background_trigger_cell = message.data.data[channel_name + '-BG-DRS_TC'].value
+        data = message.data.data[channel_name + channel_suffixes["data"]].value
+        background = message.data.data[channel_name + channel_suffixes["bg_data"]].value
+        data_trigger_cell = message.data.data[channel_name + channel_suffixes["data_trigger"]].value
+        background_trigger_cell = message.data.data[channel_name + channel_suffixes["bg_data_trigger"]].value
 
         # Offset and scale
         background = (background.astype(numpy.float32) - 0x800) / 4096
@@ -78,7 +76,13 @@ def process_messages(message, calibration_data, channel_names, device_name):
     return data_to_send
 
 
-def start_stream(ioc_host, calibration_file, link_number, device_name):
+def start_stream(ioc_host, calibration_file, link_number, device_name, first_channel_number):
+
+    # Channel numbers can start at a random integer, of course.
+    channel_mapping = []
+    for i in range(4):
+        channel_mapping.append(first_channel_number-i)
+
     try:
         # Data to be used for calibration.
         _logger.info("Using calibration file '%s'.", calibration_file)
@@ -87,15 +91,15 @@ def start_stream(ioc_host, calibration_file, link_number, device_name):
         # Channels to read from epics.
         _logger.info("Generating PVs for ioc_host '%s'.", ioc_host)
 
-        channel_names = [ioc_host + IOC_PV_TEMPLATE % (link_number, channel1),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel2),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel3),
-                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel4)]
+        channel_names = [ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[0]),
+                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[1]),
+                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[2]),
+                         ioc_host + IOC_PV_TEMPLATE % (link_number, channel_mapping[3])]
 
         dispatching_layer_request_channels = []
         for channel in channel_names:
-            for suffix in channel_suffixes:
-                dispatching_layer_request_channels.append(channel+suffix)
+            for suffix in channel_suffixes.values():
+                dispatching_layer_request_channels.append(channel + suffix)
 
         _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
 
@@ -130,6 +134,7 @@ def main():
     parser.add_argument("ioc_host", type=str, help="Host of the ioc to connect to.")
     parser.add_argument("calibration_file", type=str, help="Calibration file to use.")
     parser.add_argument("link_number", type=int, help="Number of the link to use.")
+    parser.add_argument("first_channel_number", type=int, help="Number of the first channel to use.")
     parser.add_argument("device_name", type=str, help="Name of the device - ask Arturo.")
     parser.add_argument("--log_level", default="INFO", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
@@ -140,7 +145,8 @@ def main():
     start_stream(ioc_host=arguments.ioc_host,
                  calibration_file=arguments.calibration_file,
                  link_number=arguments.link_number,
-                 device_name=arguments.device_name)
+                 device_name=arguments.device_name,
+                 first_channel_number=arguments.first_channel_number)
 
 
 if __name__ == "__main__":
