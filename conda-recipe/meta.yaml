@@ -20,6 +20,7 @@ requirements:
 build:
   entry_points:
     - calibrate_pbps = frontend_digitizers_calibration.calibrate_pbps:main
+    - calibrate_pbpg = frontend_digitizers_calibration.calibrate_pbpg:main
 
 about:
     home: https://git.psi.ch/controls_highlevel_applications/frontend_digitizers_calibration 
