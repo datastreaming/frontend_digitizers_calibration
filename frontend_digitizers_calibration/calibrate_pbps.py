@@ -3,7 +3,7 @@ import logging
 import numpy
 
 from bsread import source
-from bsread.sender import, sender
+from bsread.sender import sender
 from epics import caget, caput
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
