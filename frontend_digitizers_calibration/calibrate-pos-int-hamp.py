@@ -18,11 +18,18 @@ channel3 = 13
 channel4 = 12
 queue = deque(maxlen=240)
 
-with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
+required_channels = ['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch15-DRS_TC', 'SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DRS_TC',
+                     'SARFE10-CVME-PHO6211:Lnk9Ch14-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch14-BG-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch14-DRS_TC', 'SARFE10-CVME-PHO6211:Lnk9Ch14-BG-DRS_TC',
+                     'SARFE10-CVME-PHO6211:Lnk9Ch13-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch13-DRS_TC', 'SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DRS_TC',
+                     'SARFE10-CVME-PHO6211:Lnk9Ch12-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch12-DRS_TC', 'SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DRS_TC'
+                     ]
+
+with source(channels=required_channels) as stream:
     while True:
 
         message = stream.receive()
-# get data from stream
+
+        # get data from stream
         data1 = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA'].value
         background1 = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA'].value
         data1_trigger_cell = message.data.data['SARFE10-CVME-PHO6211:Lnk9Ch15-DRS_TC'].value
@@ -45,7 +52,7 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
 
         pulse_id = message.data.pulse_id
 
-# offset and scaling
+        # offset and scaling
         background1 = (background1.astype(numpy.float32)-0x800)/4096
         data1 = (data1.astype(numpy.float32)-0x800)/4096
 
@@ -58,44 +65,46 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
         background4 = (background4.astype(numpy.float32)-0x800)/4096
         data4 = (data4.astype(numpy.float32)-0x800)/4096
 
-# calibration
+        # calibration
         background1 = calibration_data.calibrate(background1, background1_trigger_cell, channel1)
         data1 = calibration_data.calibrate(data1, data1_trigger_cell, channel1)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-CALIBRATED',data1)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA-CALIBRATED',background1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-CALIBRATED', data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA-CALIBRATED', background1)
 
         background2 = calibration_data.calibrate(background2, background2_trigger_cell, channel2)
         data2 = calibration_data.calibrate(data2, data2_trigger_cell, channel2)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-CALIBRATED',data2)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-BG-DATA-CALIBRATED',background2)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-CALIBRATED', data2)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-BG-DATA-CALIBRATED', background2)
 
         background3 = calibration_data.calibrate(background3, background3_trigger_cell, channel3)
         data3 = calibration_data.calibrate(data3, data3_trigger_cell, channel3)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-CALIBRATED',data3)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DATA-CALIBRATED',background3)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-CALIBRATED', data3)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-BG-DATA-CALIBRATED', background3)
 
         background4 = calibration_data.calibrate(background4, background4_trigger_cell, channel4)
         data4 = calibration_data.calibrate(data4, data4_trigger_cell, channel4)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-CALIBRATED',data4)
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA-CALIBRATED',background4)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-CALIBRATED', data4)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-BG-DATA-CALIBRATED', background4)
 
-# background susbstracion
+        # background susbstracion
         data1 -= background1
         data2 -= background2
         data3 -= background3
         data4 -= background4
 
-# integration
+        # integration
         data1 = data1.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-SUM',data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch15-DATA-SUM', data1)
         data2 = data2.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-SUM',data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch14-DATA-SUM', data1)
         data3 = data3.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-SUM',data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch13-DATA-SUM', data1)
         data4 = data4.sum()
-        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-SUM',data1)
+        caput('SARFE10-CVME-PHO6211:Lnk9Ch12-DATA-SUM', data1)
 
-# intensity and position calculations
+
+
+        # intensity and position calculations
         intensity = (data1 + data2 + data3 + data4)/(-2)
 #        position1 = ((data1 - data2)/(data1 + data2))
         position1 = ((((data1 - data2)/(data1 + data2))-(-0.2115))/-0.0291)-0.4
@@ -109,12 +118,12 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
         queue.append(intensity)
 #        print(queue)
         intensity_average = sum(queue)/len(queue)
-        caput('SARFE10-PBPG050:HAMP-INTENSITY-AVG',intensity_average)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY-AVG', intensity_average)
         intensity_ds = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-DS')
         intensity_us = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-US')
         intensity_avg_keithley = (intensity_ds+intensity_us)/2
         intensity_cal = intensity*( intensity_avg_keithley/intensity_average)
-        caput('SARFE10-PBPG050:HAMP-INTENSITY-CAL',intensity_cal)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY-CAL', intensity_cal)
 
 #        print(intensity_sum)
 #        print(intensity_sum)
