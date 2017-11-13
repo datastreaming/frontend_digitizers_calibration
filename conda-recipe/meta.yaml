@@ -1,0 +1,26 @@
+package:
+    name: frontend_digitizers_calibration
+    version: 0.0.1
+
+source:
+    path: ..
+
+build:
+    number: 0
+
+requirements:
+    build:
+        - python
+
+    run:
+        - python
+        - bsread
+        - pyepics
+        - matplotlib
+
+build:
+  entry_points:
+    - calibrate_pbps = frontend_digitizers_calibration.calibrate_pbps:main
+
+about:
+    home: https://git.psi.ch/

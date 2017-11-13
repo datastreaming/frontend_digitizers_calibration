@@ -5,7 +5,7 @@ import time
 import epics
 
 from epics import caget, caput
-from drs_vcal_tcal import tcal_class, vcal_class
+from frontend_digitizers_calibration.drs_vcal_tcal import tcal_class, vcal_class
 calibration_data = vcal_class('comb006-2498.vcal')
 tcalibration_data =  tcal_class('comb006-2498.tcal')
 

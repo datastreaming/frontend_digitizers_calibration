@@ -2,10 +2,12 @@
 from bsread import source
 import numpy
 import time
+import epics
 
-
-from drs_vcal_tcal import tcal_class, vcal_class
-calibration_data = vcal_class('comb006-5120.vcal')
+from epics import caget, caput
+from frontend_digitizers_calibration.drs_vcal_tcal import tcal_class, vcal_class
+calibration_data = vcal_class('comb006-2498.vcal')
+tcalibration_data =  tcal_class('comb006-2498.tcal')
 
 
 # trigger_cell between 0 and 1023
@@ -13,7 +15,7 @@ calibration_data = vcal_class('comb006-5120.vcal')
 # channel = 15
 channel = 15
 
-with source(channels=['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch15-DRS_TC','SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DATA', 'SARFE10-CVME-PHO6211:Lnk9Ch15-BG-DRS_TC']) as stream:
+with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
     while True:
 
         message = stream.receive()
@@ -34,4 +36,6 @@ with source(channels=['SARFE10-CVME-PHO6211:Lnk9Ch15-DATA', 'SARFE10-CVME-PHO621
 
         data = data.sum()
 
-        print(pulse_id, data)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY', data)
+
+        print (data, pulse_id)
