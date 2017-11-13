@@ -31,56 +31,54 @@ def notify_epics(data_to_send):
         caput(name, value)
 
 
-def process_messages(message, calibration_data, channel_names):
+def process_messages(message, calibration_data, channel_names, device_name):
+    data_to_send = {}
 
-        data_to_send = {}
+    for channel_name in channel_names:
+        # Read from bsread message.
+        data = message.data.data[channel_name + "-DATA"].value
+        background = message.data.data[channel_name + '-BG-DATA'].value
+        data_trigger_cell = message.data.data[channel_name + '-DRS_TC'].value
+        background_trigger_cell = message.data.data[channel_name + '-BG-DRS_TC'].value
 
-        for channel_name in channel_names:
+        # Offset and scale
+        background = (background.astype(numpy.float32) - 0x800) / 4096
+        data = (data.astype(numpy.float32) - 0x800) / 4096
 
-            # Read from bsread message.
-            data = message.data.data[channel_name + "-DATA"].value
-            background = message.data.data[channel_name + '-BG-DATA'].value
-            data_trigger_cell = message.data.data[channel_name + '-DRS_TC'].value
-            background_trigger_cell = message.data.data[channel_name + '-BG-DRS_TC'].value
+        # Calibrate
+        background = calibration_data.calibrate(background, background_trigger_cell, channel1)
+        data = calibration_data.calibrate(data, data_trigger_cell, channel1)
 
-            # Offset and scale
-            background = (background.astype(numpy.float32) - 0x800) / 4096
-            data = (data.astype(numpy.float32) - 0x800) / 4096
+        # background subtraction
+        data -= background
 
-            # Calibrate
-            background = calibration_data.calibrate(background, background_trigger_cell, channel1)
-            data = calibration_data.calibrate(data, data_trigger_cell, channel1)
+        # integration
+        data_sum = data.sum()
 
-            # background subtraction
-            data -= background
+        data_to_send[channel_name + '-DATA-SUM'] = data_sum
+        data_to_send[channel_name + '-DATA-CALIBRATED'] = data
+        data_to_send[channel_name + '-BG-DATA-CALIBRATED'] = background
 
-            # integration
-            data_sum = data.sum()
+    notify_epics(data_to_send)
 
-            data_to_send[channel_name+'-DATA-SUM'] = data_sum
-            data_to_send[channel_name+'-DATA-CALIBRATED'] = data
-            data_to_send[channel_name+'-BG-DATA-CALIBRATED'] = background
+    # intensity and position calculations
+    data1_sum = data_to_send[channel_names[0] + '-DATA-SUM']
+    data2_sum = data_to_send[channel_names[1] + '-DATA-SUM']
+    data3_sum = data_to_send[channel_names[2] + '-DATA-SUM']
+    data4_sum = data_to_send[channel_names[3] + '-DATA-SUM']
 
-        notify_epics(data_to_send)
+    intensity = (data1_sum + data2_sum + data3_sum + data4_sum) / (2)
+    position1 = ((data1_sum - data2_sum) / (data1_sum + data2_sum))
+    position2 = ((data3_sum - data4_sum) / (data3_sum + data4_sum))
 
-        # intensity and position calculations
-        data1_sum = data_to_send[channel_names[0]+'-DATA-SUM']
-        data2_sum = data_to_send[channel_names[1]+'-DATA-SUM']
-        data3_sum = data_to_send[channel_names[2]+'-DATA-SUM']
-        data4_sum = data_to_send[channel_names[3]+'-DATA-SUM']
+    data_to_send[device_name + "INTENSITY-CAL"] = intensity
+    data_to_send[device_name + "XPOS"] = position1
+    data_to_send[device_name + "YPOS"] = position2
 
-        intensity = (data1_sum + data2_sum + data3_sum + data4_sum) / (2)
-        position1 = ((data1_sum - data2_sum) / (data1_sum + data2_sum))
-        position2 = ((data3_sum - data4_sum) / (data3_sum + data4_sum))
-
-        data_to_send["intensity"] = intensity
-        data_to_send["position1"] = position1
-        data_to_send["position2"] = position2
-
-        return data_to_send
+    return data_to_send
 
 
-def start_stream(ioc_host, calibration_file, link_number):
+def start_stream(ioc_host, calibration_file, link_number, device_name):
     try:
         # Data to be used for calibration.
         _logger.info("Using calibration file %s.", calibration_file)
@@ -96,21 +94,26 @@ def start_stream(ioc_host, calibration_file, link_number):
 
         _logger.info("Connecting to channels %s.", channel_names)
 
+        _logger.info("Using device name %s.", device_name)
+
         with source(host=ioc_host, port=9999) as input_stream:
             with sender(mode=PUB) as output_stream:
                 while True:
                     message = input_stream.receive()
-                    _logger.info("Received message with pulse_id %s.", message.data.pulse_id)
+                    _logger.debug("Received message with pulse_id %s.", message.data.pulse_id)
 
-                    data = process_messages(message, calibration_data, channel_names)
+                    data = process_messages(message=message,
+                                            calibration_data=calibration_data,
+                                            channel_names=channel_names,
+                                            device_name=device_name)
 
-                    _logger.info("Message with pulse_id %s processed.", message.data.pulse_id)
+                    _logger.debug("Message with pulse_id %s processed.", message.data.pulse_id)
 
-                    output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
-                                       pulse_id=message.data.pulse_id,
-                                       data=data)
+                    output_stream.debug(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
+                                        pulse_id=message.data.pulse_id,
+                                        data=data)
 
-                    _logger.info("Message with pulse_id %s sent out.", message.data.pulse_id)
+                    _logger.debug("Message with pulse_id %s sent out.", message.data.pulse_id)
 
     except KeyboardInterrupt:
         _logger.info("Terminating due to user request.")
@@ -122,7 +125,8 @@ def main():
     parser.add_argument("ioc_host", type=str, help="Host of the ioc to connect to.")
     parser.add_argument("calibration_file", type=str, help="Calibration file to use.")
     parser.add_argument("link_number", type=int, help="Number of the link to use.")
-    parser.add_argument("--log_level", default="DEBUG", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
+    parser.add_argument("device_name", type=str, help="Name of the device - ask Arturo.")
+    parser.add_argument("--log_level", default="INFO", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
     arguments = parser.parse_args()
 
@@ -130,7 +134,8 @@ def main():
 
     start_stream(ioc_host=arguments.ioc_host,
                  calibration_file=arguments.calibration_file,
-                 link_number=arguments.link_number)
+                 link_number=arguments.link_number,
+                 device_name=arguments.device_name)
 
 
 if __name__ == "__main__":
