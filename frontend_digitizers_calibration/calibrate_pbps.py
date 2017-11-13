@@ -1,16 +1,15 @@
-from bsread import source
-from bsread.sender import Sender, sender
-from collections import deque
+import argparse
+import logging
 import numpy
-import time
-import epics
-import sys
 
+from bsread import source
+from bsread.sender import, sender
 from epics import caget, caput
-
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
-calibration_data = vcal_class('wd135-5120.vcal')
+_logger = logging.getLogger(__name__)
+
+
 
 # trigger_cell between 0 and 1023
 # trigger_cell = 0
@@ -20,121 +19,148 @@ channel2 = 14
 channel3 = 13
 channel4 = 12
 
+data1_channel_name = ':Lnk9Ch%d' % channel1
+data2_channel_name = ':Lnk9Ch%d' % channel2
+data3_channel_name = ':Lnk9Ch%d' % channel3
+data4_channel_name = ':Lnk9Ch%d' % channel4
+
 
 # queue = deque(maxlen=240)
 
-
-def process_messages(stream, generator):
-    while True:
-        try:
-            message = stream.receive()
-            # get data from stream
-            data1 = message.data.data[sys.argv[1] + ':Lnk9Ch15-DATA'].value
-            background1 = message.data.data[sys.argv[1] + ':Lnk9Ch15-BG-DATA'].value
-            data1_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch15-DRS_TC'].value
-            background1_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch15-BG-DRS_TC'].value
-
-            data2 = message.data.data[sys.argv[1] + ':Lnk9Ch14-DATA'].value
-            background2 = message.data.data[sys.argv[1] + ':Lnk9Ch14-BG-DATA'].value
-            data2_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch14-DRS_TC'].value
-            background2_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch14-BG-DRS_TC'].value
-
-            data3 = message.data.data[sys.argv[1] + ':Lnk9Ch13-DATA'].value
-            background3 = message.data.data[sys.argv[1] + ':Lnk9Ch13-BG-DATA'].value
-            data3_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch13-DRS_TC'].value
-            background3_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch13-BG-DRS_TC'].value
-
-            data4 = message.data.data[sys.argv[1] + ':Lnk9Ch12-DATA'].value
-            background4 = message.data.data[sys.argv[1] + ':Lnk9Ch12-BG-DATA'].value
-            data4_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch12-DRS_TC'].value
-            background4_trigger_cell = message.data.data[sys.argv[1] + ':Lnk9Ch12-BG-DRS_TC'].value
-
-            pulse_id1 = message.data.pulse_id
-            global_timestamp = message.data.global_timestamp
-            global_timestamp_offset = message.data.global_timestamp_offset
-
-            #        timestamp1 = str(global_timestamp) + '.' + str(global_timestamp_offset)
-            timestamp1 = global_timestamp + (global_timestamp_offset) / (1e9)
-            print(timestamp1)
-            print(global_timestamp_offset)
-            #        print(global_timestamp)
-            #        print(a)
-            #        print(type(a))
-
-            # offset and scaling
-            background1 = (background1.astype(numpy.float32) - 0x800) / 4096
-            data1 = (data1.astype(numpy.float32) - 0x800) / 4096
-
-            background2 = (background2.astype(numpy.float32) - 0x800) / 4096
-            data2 = (data2.astype(numpy.float32) - 0x800) / 4096
-
-            background3 = (background3.astype(numpy.float32) - 0x800) / 4096
-            data3 = (data3.astype(numpy.float32) - 0x800) / 4096
-
-            background4 = (background4.astype(numpy.float32) - 0x800) / 4096
-            data4 = (data4.astype(numpy.float32) - 0x800) / 4096
-
-            # calibration
-            background1 = calibration_data.calibrate(background1, background1_trigger_cell, channel1)
-            data1 = calibration_data.calibrate(data1, data1_trigger_cell, channel1)
-            caput(sys.argv[1] + ':Lnk9Ch15-DATA-CALIBRATED', data1)
-            caput(sys.argv[1] + ':Lnk9Ch15-BG-DATA-CALIBRATED', background1)
-
-            background2 = calibration_data.calibrate(background2, background2_trigger_cell, channel2)
-            data2 = calibration_data.calibrate(data2, data2_trigger_cell, channel2)
-            caput(sys.argv[1] + ':Lnk9Ch14-DATA-CALIBRATED', data2)
-            caput(sys.argv[1] + ':Lnk9Ch14-BG-DATA-CALIBRATED', background2)
-
-            background3 = calibration_data.calibrate(background3, background3_trigger_cell, channel3)
-            data3 = calibration_data.calibrate(data3, data3_trigger_cell, channel3)
-            caput(sys.argv[1] + ':Lnk9Ch13-DATA-CALIBRATED', data3)
-            caput(sys.argv[1] + ':Lnk9Ch13-BG-DATA-CALIBRATED', background3)
-
-            background4 = calibration_data.calibrate(background4, background4_trigger_cell, channel4)
-            data4 = calibration_data.calibrate(data4, data4_trigger_cell, channel4)
-            caput(sys.argv[1] + ':Lnk9Ch12-DATA-CALIBRATED', data4)
-            caput(sys.argv[1] + ':Lnk9Ch12-BG-DATA-CALIBRATED', background4)
-
-            # background susbstracion
-            data1 -= background1
-            data2 -= background2
-            data3 -= background3
-            data4 -= background4
-
-            # integration
-            data1 = data1.sum()
-            caput(sys.argv[1] + ':Lnk9Ch15-DATA-SUM', data1)
-            data2 = data2.sum()
-            caput(sys.argv[1] + ':Lnk9Ch14-DATA-SUM', data1)
-            data3 = data3.sum()
-            caput(sys.argv[1] + ':Lnk9Ch13-DATA-SUM', data1)
-            data4 = data4.sum()
-            caput(sys.argv[1] + ':Lnk9Ch12-DATA-SUM', data1)
-
-            # intensity and position calculations
-            intensity = (data1 + data2 + data3 + data4) / (2)
-            position1 = ((data1 - data2) / (data1 + data2))
-            #        position1 = ((((data1 - data2)/(data1 + data2))-(-0.2115))/-0.0291)-0.4
-            position2 = ((data3 - data4) / (data3 + data4))
-            #       position2 = ((((data3 - data4)/(data3 + data4))-(-0.1632))/0.0161)+0.2
+# TODO: We might want to remove this.
+def notify_epics(data_to_send):
+    """
+    Notify epics channels from the data.
+    :param data_to_send: Dictionary with PV_name: Value to set the channels to.
+    """
+    for name, value in data_to_send.items():
+        caput(name, value)
 
 
-            #        print(pulse_id)
-            #       print(global_timestamp)
-            #        print(global_timestamp_offset)
+def process_messages(message, ioc_prefix, calibration_data):
 
-            name = 'SAROP21-CVME-PBPS:Lnk9Ch15-DATA-SUM'
-            generator.send(timestamp=timestamp1, pulse_id=pulse_id1, check_data=True,
-                           data={name: data1})
+        def get_channel_data(input_data, channel_name):
 
-        except KeyboardInterrupt:
-            print("Terminating due to user request.")
+            data = input_data.data.data[channel_name + "-DATA"].value
+            background = input_data.data.data[channel_name + '-BG-DATA'].value
+            data_trigger_cell = input_data.data.data[channel_name + '-DRS_TC'].value
+            background_trigger_cell = input_data.data.data[channel_name + '-BG-DRS_TC'].value
+
+            return data, background, data_trigger_cell, background_trigger_cell
+
+        # get data from stream
+        data1, background1, data1_trigger_cell, background1_trigger_cell = \
+            get_channel_data(message, ioc_prefix+data1_channel_name)
+
+        data2, background2, data2_trigger_cell, background2_trigger_cell = \
+            get_channel_data(message, ioc_prefix + data2_channel_name)
+
+        data3, background3, data3_trigger_cell, background3_trigger_cell = \
+            get_channel_data(message, ioc_prefix + data3_channel_name)
+
+        data4, background4, data4_trigger_cell, background4_trigger_cell = \
+            get_channel_data(message, ioc_prefix + data4_channel_name)
+
+        def offset_and_scale(background, data):
+
+            background = (background.astype(numpy.float32) - 0x800) / 4096
+            data = (data.astype(numpy.float32) - 0x800) / 4096
+
+            return background, data
+
+        background1, data1 = offset_and_scale(background1, data1)
+        background2, data2 = offset_and_scale(background2, data2)
+        background3, data3 = offset_and_scale(background3, data3)
+        background4, data4 = offset_and_scale(background4, data4)
+
+        # calibration
+        background1 = calibration_data.calibrate(background1, background1_trigger_cell, channel1)
+        data1 = calibration_data.calibrate(data1, data1_trigger_cell, channel1)
+
+        background2 = calibration_data.calibrate(background2, background2_trigger_cell, channel2)
+        data2 = calibration_data.calibrate(data2, data2_trigger_cell, channel2)
+
+        background3 = calibration_data.calibrate(background3, background3_trigger_cell, channel3)
+        data3 = calibration_data.calibrate(data3, data3_trigger_cell, channel3)
+
+        background4 = calibration_data.calibrate(background4, background4_trigger_cell, channel4)
+        data4 = calibration_data.calibrate(data4, data4_trigger_cell, channel4)
+
+        # background subtraction
+        data1 -= background1
+        data2 -= background2
+        data3 -= background3
+        data4 -= background4
+
+        # integration
+        data1_sum = data1.sum()
+        data2_sum = data2.sum()
+        data3_sum = data3.sum()
+        data4_sum = data4.sum()
+
+        data_to_send = {
+            ioc_prefix + data1_channel_name + '-DATA-SUM': data1_sum,
+            ioc_prefix + data1_channel_name + '-DATA-CALIBRATED': data1,
+            ioc_prefix + data1_channel_name + '-BG-DATA-CALIBRATED': background1,
+
+            ioc_prefix + data2_channel_name + '-DATA-SUM': data2_sum,
+            ioc_prefix + data2_channel_name + '-DATA-CALIBRATED': data2,
+            ioc_prefix + data2_channel_name + '-BG-DATA-CALIBRATED': background2,
+
+            ioc_prefix + data3_channel_name + '-DATA-SUM': data3_sum,
+            ioc_prefix + data3_channel_name + '-DATA-CALIBRATED': data3,
+            ioc_prefix + data3_channel_name + '-BG-DATA-CALIBRATED': background3,
+
+            ioc_prefix + data4_channel_name + '-DATA-SUM': data4_sum,
+            ioc_prefix + data4_channel_name + '-DATA-CALIBRATED': data4,
+            ioc_prefix + data4_channel_name + '-BG-DATA-CALIBRATED': background4,
+        }
+
+        notify_epics(data_to_send)
+
+        # intensity and position calculations
+        intensity = (data1_sum + data2_sum + data3_sum + data4_sum) / (2)
+        position1 = ((data1_sum - data2_sum) / (data1_sum + data2_sum))
+        position2 = ((data3_sum - data4_sum) / (data3_sum + data4_sum))
+
+        data_to_send[ioc_prefix + ":intensity"] = intensity
+        data_to_send[ioc_prefix + ":position1"] = position1
+        data_to_send[ioc_prefix + ":position2"] = position2
+
+        return data_to_send
+
+
+def start_stream(ioc_host, calibration_file):
+    try:
+        _logger.info("Connecting to ioc %s.", ioc_host)
+
+        calibration_data = vcal_class(calibration_file)
+        with source(host=ioc_host, port=9999) as input_stream:
+            with sender() as output_stream:
+                while True:
+                    message = input_stream.receive()
+
+                    data = process_messages(message, ioc_host, calibration_data)
+
+                    output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
+                                       pulse_id=message.data.pulse_id,
+                                       data=data)
+    except KeyboardInterrupt:
+        _logger.info("Terminating due to user request.")
 
 
 def main():
-    with source(host=sys.argv[1], port=9999) as input_stream:
-        with sender() as output_stream:
-            process_messages(input_stream, output_stream)
+    parser = argparse.ArgumentParser(description='Arturo will fill this out.')
+
+    parser.add_argument("ioc_host", type=str, help="Host of the ioc to connect to.")
+    parser.add_argument("calibration_file", type=str, help="Calibration file to use.")
+    parser.add_argument("--log_level", default="DEBUG", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
+                        help="Log level to use.")
+    arguments = parser.parse_args()
+
+    logging.basicConfig(level=arguments.log_level, format='[%(levelname)s] %(message)s')
+
+    start_stream(ioc_host=arguments.ioc_host, calibration_file=arguments.calibration_file)
 
 
 if __name__ == "__main__":
