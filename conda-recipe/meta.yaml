@@ -14,7 +14,7 @@ requirements:
 
     run:
         - python
-        - bsread
+        - bsread >=0.9.12
         - pyepics
         - matplotlib
 
