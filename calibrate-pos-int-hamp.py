@@ -110,6 +110,12 @@ with source(host='SARFE10-CVME-PHO6211', port=9999) as stream:
 #        print(queue)
         intensity_average = sum(queue)/len(queue)
         caput('SARFE10-PBPG050:HAMP-INTENSITY-AVG',intensity_average)
+        intensity_ds = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-DS')
+        intensity_us = caget('SARFE10-PBPG050:PHOTON-ENERGY-PER-PULSE-US')
+        intensity_avg_keithley = (intensity_ds+intensity_us)/2
+        intensity_cal = intensity*( intensity_avg_keithley/intensity_average)
+        caput('SARFE10-PBPG050:HAMP-INTENSITY-CAL',intensity_cal)
+
 #        print(intensity_sum)
 #        print(intensity_sum)
         print(pulse_id)
