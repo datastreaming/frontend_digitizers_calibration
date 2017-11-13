@@ -76,7 +76,7 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
     return data_to_send
 
 
-def start_stream(ioc_host, calibration_file, link_number, device_name, first_channel_number):
+def start_stream(ioc_host, calibration_file, link_number, device_name, first_channel_number, output_stream_port):
 
     _logger.info("Using device name '%s'.", device_name)
 
@@ -104,7 +104,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
         _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
 
         with source(channels=dispatching_layer_request_channels) as input_stream:
-            with sender(mode=PUB) as output_stream:
+            with sender(mode=PUB, port=output_stream_port) as output_stream:
                 while True:
                     message = input_stream.receive()
                     _logger.debug("Received message with pulse_id '%s'.", message.data.pulse_id)
@@ -135,6 +135,7 @@ def main():
     parser.add_argument("device_name", type=str, help="Name of the device - ask Arturo.")
     parser.add_argument("--log_level", default="INFO", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
+    parser.add_argument("--port", type=int, default=9999, help="Port to run the output stream on.")
     arguments = parser.parse_args()
 
     logging.basicConfig(level=arguments.log_level, format='[%(levelname)s] %(message)s')
@@ -143,7 +144,8 @@ def main():
                  calibration_file=arguments.calibration_file,
                  link_number=arguments.link_number,
                  device_name=arguments.device_name,
-                 first_channel_number=arguments.first_channel_number)
+                 first_channel_number=arguments.first_channel_number,
+                 output_stream_port=arguments.port)
 
 
 if __name__ == "__main__":

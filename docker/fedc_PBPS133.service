@@ -11,6 +11,6 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill fedc_PBPS133
 ExecStartPre=-/usr/bin/docker rm fedc_PBPS133
 ExecStartPre=/usr/bin/docker pull docker.psi.ch:5000/frontend_digitizers_calibration
-ExecStart=/usr/bin/docker run --name fedc_PBPS133 --net=host --env-file /etc/fedc_environment docker.psi.ch:5000/frontend_digitizers_calibration calibrate_pbps SAROP21-CVME-PBPS /cfg/calib/wd135/wd135-2498.vcal 9 15 SAROP21-PBPS133:
+ExecStart=/usr/bin/docker run --name fedc_PBPS133 --net=host --env-file /etc/fedc_environment docker.psi.ch:5000/frontend_digitizers_calibration calibrate_pbps SAROP21-CVME-PBPS /cfg/calib/wd135/wd135-2498.vcal 9 15 SAROP21-PBPS133: --port 10002
 ExecStop=/usr/bin/docker stop fedc_PBPS133
 Restart=always
