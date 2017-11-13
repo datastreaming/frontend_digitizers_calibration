@@ -3,7 +3,7 @@ import logging
 import numpy
 
 from bsread import source
-from bsread.sender import sender
+from bsread.sender import sender, PUB
 from epics import caget, caput
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
@@ -34,6 +34,7 @@ def notify_epics(data_to_send):
     :param data_to_send: Dictionary with PV_name: Value to set the channels to.
     """
     for name, value in data_to_send.items():
+        _logger.debug("Setting epics channel %s to value %s.", name, value)
         caput(name, value)
 
 
@@ -136,15 +137,21 @@ def start_stream(ioc_host, calibration_file):
 
         calibration_data = vcal_class(calibration_file)
         with source(host=ioc_host, port=9999) as input_stream:
-            with sender() as output_stream:
+            with sender(mode=PUB) as output_stream:
                 while True:
                     message = input_stream.receive()
+                    _logger.info("Received message with pulse_id %s.", message.data.pulse_id)
 
                     data = process_messages(message, ioc_host, calibration_data)
+
+                    _logger.info("Message with pulse_id %s processed.", message.data.pulse_id)
 
                     output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
                                        pulse_id=message.data.pulse_id,
                                        data=data)
+
+                    _logger.info("Message with pulse_id %s sent out.", message.data.pulse_id)
+
     except KeyboardInterrupt:
         _logger.info("Terminating due to user request.")
 
