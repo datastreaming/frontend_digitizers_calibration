@@ -68,7 +68,7 @@ def process_message(message, channel_numbers, calibration_data, keithley_intensi
 
 def main(update_epics=True):
 
-    calibration_data = vcal_class('docker/cfg/comb006-2498.vcal')
+    calibration_data = vcal_class('/cfg/comb006-2498.vcal')
     channel_numbers = [15, 14, 13, 12]
     queue = deque(maxlen=240)
 
