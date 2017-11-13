@@ -18,9 +18,6 @@ channel3 = 13
 channel4 = 12
 
 
-# queue = deque(maxlen=240)
-
-
 # TODO: We might want to remove this.
 def notify_epics(data_to_send):
     """
