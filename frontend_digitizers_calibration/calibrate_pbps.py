@@ -17,6 +17,8 @@ channel2 = 14
 channel3 = 13
 channel4 = 12
 
+channel_suffixes = ["-DATA", '-BG-DATA', '-DRS_TC', '-BG-DRS_TC']
+
 
 # TODO: We might want to remove this.
 def notify_epics(data_to_send):
@@ -90,7 +92,12 @@ def start_stream(ioc_host, calibration_file, link_number, device_name):
                          ioc_host + IOC_PV_TEMPLATE % (link_number, channel3),
                          ioc_host + IOC_PV_TEMPLATE % (link_number, channel4)]
 
-        _logger.info("Connecting to channels '%s'.", channel_names)
+        dispatching_layer_request_channels = []
+        for channel in channel_names:
+            for suffix in channel_suffixes:
+                dispatching_layer_request_channels.append(channel+suffix)
+
+        _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
 
         _logger.info("Using device name '%s'.", device_name)
 
