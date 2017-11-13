@@ -16,7 +16,6 @@ requirements:
         - python
         - bsread >=0.9.12
         - pyepics
-        - matplotlib
 
 build:
   entry_points:
