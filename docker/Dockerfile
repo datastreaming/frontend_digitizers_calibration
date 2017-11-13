@@ -5,4 +5,4 @@ ENV CFG_DIR /cfg
 
 ADD cfg/ ${CFG_DIR}/
 
-ADD startup.ch /
+ADD startup.sh /
