@@ -57,8 +57,6 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
         data_to_send[channel_name + '-DATA-CALIBRATED'] = data
         data_to_send[channel_name + '-BG-DATA-CALIBRATED'] = background
 
-    notify_epics(data_to_send)
-
     # intensity and position calculations
     data1_sum = data_to_send[channel_names[0] + '-DATA-SUM']
     data2_sum = data_to_send[channel_names[1] + '-DATA-SUM']
@@ -72,6 +70,8 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
     data_to_send[device_name + "INTENSITY-CAL"] = intensity
     data_to_send[device_name + "XPOS"] = position1
     data_to_send[device_name + "YPOS"] = position2
+
+    notify_epics(data_to_send)
 
     return data_to_send
 
