@@ -4,3 +4,5 @@ RUN conda install -c paulscherrerinstitute frontend_digitizers_calibration && co
 ENV CFG_DIR /cfg
 
 ADD cfg/ ${CFG_DIR}/
+
+ADD startup.sh /
