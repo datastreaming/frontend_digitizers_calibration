@@ -1,5 +1,5 @@
 from bsread import source
-from bsread.sender import sender, PUB
+from bsread.sender import sender, PUSH
 
 from collections import deque
 import numpy
@@ -82,7 +82,7 @@ def main(update_epics=True):
         required_channels.append("SARFE10-CVME-PHO6211:Lnk9Ch%d-BG-DRS_TC" % n)
 
     with source(channels=required_channels) as stream:
-        with sender(mode=PUB) as output_stream:
+        with sender(mode=PUSH) as output_stream:
             while True:
 
                 # scaling
