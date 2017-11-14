@@ -3,7 +3,7 @@ import logging
 import numpy
 
 from bsread import source
-from bsread.sender import sender, PUB
+from bsread.sender import sender, PUSH
 from epics import caget, caput
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
@@ -16,12 +16,6 @@ channel_suffixes = {"data": "-DATA",
                     "bg_data": '-BG-DATA',
                     "data_trigger": '-DRS_TC',
                     "bg_data_trigger": '-BG-DRS_TC'}
-
-
-# TODO: This should be implemented on the bsread level.
-def append_input_data(data_to_send, message):
-    for name, value in message.data.data.items():
-        data_to_send[name] = value.value
 
 
 # TODO: We might want to remove this.
@@ -81,8 +75,6 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
 
     notify_epics(data_to_send)
 
-    append_input_data(data_to_send, message)
-
     return data_to_send
 
 
@@ -114,7 +106,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
         _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
 
         with source(channels=dispatching_layer_request_channels) as input_stream:
-            with sender(mode=PUB, port=output_stream_port) as output_stream:
+            with sender(mode=PUSH, port=output_stream_port) as output_stream:
                 while True:
                     message = input_stream.receive()
                     _logger.debug("Received message with pulse_id '%s'.", message.data.pulse_id)
