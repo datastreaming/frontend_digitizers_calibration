@@ -63,7 +63,9 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
     data3_sum = data_to_send[channel_names[2] + '-DATA-SUM']
     data4_sum = data_to_send[channel_names[3] + '-DATA-SUM']
 
-    intensity = (data1_sum + data2_sum + data3_sum + data4_sum) / (2)
+    intensity = (data1_sum + data2_sum + data3_sum + data4_sum) / 2
+    intensity = abs(intensity)
+
     position1 = ((data1_sum - data2_sum) / (data1_sum + data2_sum))
     position2 = ((data3_sum - data4_sum) / (data3_sum + data4_sum))
 

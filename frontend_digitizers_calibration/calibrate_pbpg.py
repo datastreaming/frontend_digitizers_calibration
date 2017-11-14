@@ -46,7 +46,9 @@ def process_message(message, channel_numbers, calibration_data, keithley_intensi
         background.append(channel_background)
 
     # intensity and position calculations
-    intensity = (data[0] + data[1] + data[2] + data[3]) / (-2)
+    intensity = (data[0] + data[1] + data[2] + data[3]) / 2
+    intensity = abs(intensity)
+
     position1 = ((((data[0] - data[1]) / (data[0] + data[1])) - (-0.2115)) / -0.0291) - 0.4
     position2 = ((((data[2] - data[3]) / (data[2] + data[3])) - (-0.1632)) / 0.0161) + 0.2
 
