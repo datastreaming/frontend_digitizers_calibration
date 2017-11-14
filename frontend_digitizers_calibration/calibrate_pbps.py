@@ -18,6 +18,12 @@ channel_suffixes = {"data": "-DATA",
                     "bg_data_trigger": '-BG-DRS_TC'}
 
 
+# TODO: This should be implemented on the bsread level.
+def append_input_data(data_to_send, message):
+    for name, value in message.data.data.items():
+        data_to_send[name] = value.value
+
+
 # TODO: We might want to remove this.
 def notify_epics(data_to_send):
     """
@@ -74,6 +80,8 @@ def process_messages(message, calibration_data, channel_names, device_name, firs
     data_to_send[device_name + "YPOS"] = position2
 
     notify_epics(data_to_send)
+
+    append_input_data(data_to_send, message)
 
     return data_to_send
 
