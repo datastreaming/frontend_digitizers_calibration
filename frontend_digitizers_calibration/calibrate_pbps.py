@@ -3,7 +3,7 @@ import logging
 import numpy
 
 from bsread import source
-from bsread.sender import sender, PUB
+from bsread.sender import sender, PUSH
 from epics import caget, caput
 from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
 
@@ -106,7 +106,7 @@ def start_stream(ioc_host, calibration_file, link_number, device_name, first_cha
         _logger.info("Requesting channels from dispatching layer '%s'.", dispatching_layer_request_channels)
 
         with source(channels=dispatching_layer_request_channels) as input_stream:
-            with sender(mode=PUB, port=output_stream_port) as output_stream:
+            with sender(mode=PUSH, port=output_stream_port) as output_stream:
                 while True:
                     message = input_stream.receive()
                     _logger.debug("Received message with pulse_id '%s'.", message.data.pulse_id)
