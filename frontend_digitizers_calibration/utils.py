@@ -12,6 +12,7 @@ _logger = logging.getLogger(__name__)
 
 
 def load_ioc_host_config(config_folder, config_file_name):
+
     config_file_path = os.path.join(config_folder, config_file_name, ".json")
 
     if not os.path.exists(config_file_path):
@@ -33,6 +34,7 @@ def load_ioc_host_config(config_folder, config_file_name):
 
 
 def load_frequency_mapping(ioc_host_config, config_folder):
+
     frequency_map = ioc_host_config[config.CONFIG_SECTION_FREQUENCY_MAPPING]
 
     frequency_files = {}
@@ -59,10 +61,21 @@ def load_calibration_data(sampling_frequency, frequency_files):
                       calibration_file_name, sampling_frequency)
         exit()
 
+    # Check if we already have this calibration file loaded.
+    if calibration_file_name == load_calibration_data.last_loaded_file_name:
+        return load_calibration_data.last_loaded_calibration
+
     _logger.debug("Loading calibration file '%s'.", calibration_file_name)
     calibration_data = vcal_class(calibration_file_name)
 
+    load_calibration_data.last_loaded_file_name = calibration_file_name
+    load_calibration_data.last_loaded_calibration = calibration_data
+
     return calibration_data
+
+# Store info about last loaded calibration file.
+load_calibration_data.last_loaded_file_name = None
+load_calibration_data.last_loaded_calibration = None
 
 
 def notify_epics(data_to_send):
