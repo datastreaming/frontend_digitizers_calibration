@@ -11,7 +11,8 @@ from frontend_digitizers_calibration.utils import load_ioc_host_config, load_fre
 _logger = logging.getLogger(__name__)
 
 
-def process(message, devices, frequency_value_name, frequency_files):
+def process_message(message, devices, frequency_value_name, frequency_files):
+
     sampling_frequency = message.data.data[frequency_value_name].value
     calibration_data = load_calibration_data(sampling_frequency, frequency_files)
 
@@ -21,6 +22,8 @@ def process(message, devices, frequency_value_name, frequency_files):
 
         device_type = device_definition[config.CONFIG_DEVICE_TYPE]
         channels_definition = device_definition[config.CONFIG_DEVICE_CHANNELS]
+
+        _logger.debug("Processing device_type '%s'.", device_type)
 
         processing_function = device_type_processing_function_mapping[device_type]
 
@@ -37,6 +40,7 @@ def process(message, devices, frequency_value_name, frequency_files):
 
 
 def start_stream(config_folder, config_file, input_stream_port, output_stream_port):
+
     ioc_host, ioc_host_config = load_ioc_host_config(config_folder=config_folder, config_file_name=config_file)
     _logger.info("Configuration defines ioc_host '%s'.", ioc_host)
 
@@ -57,10 +61,10 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
                     _logger.debug("Received message with pulse_id '%s'.", message.data.pulse_id)
 
-                    data = process(message=message,
-                                   devices=devices,
-                                   frequency_value_name=frequency_value_name,
-                                   frequency_files=frequency_files)
+                    data = process_message(message=message,
+                                           devices=devices,
+                                           frequency_value_name=frequency_value_name,
+                                           frequency_files=frequency_files)
 
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 
