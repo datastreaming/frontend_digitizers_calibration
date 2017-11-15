@@ -5,5 +5,7 @@ setup(name="frontend_digitizers_calibration",
       author="Paul Scherrer Institute",
       description="Arturo will fill this out.",
       license="GPL3",
-      packages=['frontend_digitizers_calibration'],
+      packages=['frontend_digitizers_calibration',
+                'frontend_digitizers_calibration.devices',
+                'frontend_digitizers_calibration.scripts'],
       )
