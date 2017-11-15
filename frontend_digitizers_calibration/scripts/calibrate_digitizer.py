@@ -2,7 +2,6 @@ import argparse
 import logging
 
 from frontend_digitizers_calibration import config
-from frontend_digitizers_calibration.processing import process
 from frontend_digitizers_calibration.stream import start_stream
 
 _logger = logging.getLogger(__name__)
@@ -27,8 +26,7 @@ def main():
     start_stream(config_folder=arguments.config_folder,
                  config_file=arguments.config_file_name,
                  input_stream_port=config.input_stream_port,
-                 output_stream_port=config.output_stream_port,
-                 processing_function=process)
+                 output_stream_port=config.output_stream_port)
 
 if __name__ == "__main__":
     main()

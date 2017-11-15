@@ -4,13 +4,39 @@ from bsread import source
 from bsread.sender import sender
 
 from frontend_digitizers_calibration import config
-from frontend_digitizers_calibration.utils import load_ioc_host_config, load_frequency_mapping
+from frontend_digitizers_calibration.devices.utils import device_type_processing_function_mapping
+from frontend_digitizers_calibration.utils import load_ioc_host_config, load_frequency_mapping, append_message_data, \
+    load_calibration_data
 
 _logger = logging.getLogger(__name__)
 
 
-def start_stream(config_folder, config_file, input_stream_port, output_stream_port, processing_function):
+def process(message, devices, frequency_value_name, frequency_files):
+    sampling_frequency = message.data.data[frequency_value_name].value
+    calibration_data = load_calibration_data(sampling_frequency, frequency_files)
 
+    _logger.debug("Sampling frequency '%s'.", sampling_frequency)
+
+    for device_name, device_definition in devices.items():
+
+        device_type = device_definition[config.CONFIG_DEVICE_TYPE]
+        channels_definition = device_definition[config.CONFIG_DEVICE_CHANNELS]
+
+        processing_function = device_type_processing_function_mapping[device_type]
+
+        data_to_send = processing_function(message=message,
+                                           device_name=device_name,
+                                           device_definition=device_definition,
+                                           channels_definition=channels_definition,
+                                           calibration_data=calibration_data)
+
+    # Append the data from the original message.
+    append_message_data(message, data_to_send)
+
+    return data_to_send
+
+
+def start_stream(config_folder, config_file, input_stream_port, output_stream_port):
     ioc_host, ioc_host_config = load_ioc_host_config(config_folder=config_folder, config_file_name=config_file)
     _logger.info("Configuration defines ioc_host '%s'.", ioc_host)
 
@@ -31,10 +57,10 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
                     _logger.debug("Received message with pulse_id '%s'.", message.data.pulse_id)
 
-                    data = processing_function(message=message,
-                                               devices=devices,
-                                               frequency_value_name=frequency_value_name,
-                                               frequency_files=frequency_files)
+                    data = process(message=message,
+                                   devices=devices,
+                                   frequency_value_name=frequency_value_name,
+                                   frequency_files=frequency_files)
 
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 

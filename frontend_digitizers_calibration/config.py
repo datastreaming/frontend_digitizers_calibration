@@ -9,6 +9,7 @@ CONFIG_SECTION_DEVICES = "devices"
 
 # Device property names.
 CONFIG_DEVICE_TYPE = "device_type"
+CONFIG_DEVICE_CHANNELS = "channels"
 CONFIG_DEVICE_X_SCALING_FACTOR = "x_scaling_factor"
 CONFIG_DEVICE_X_SCALING_OFFSET = "x_scaling_offset"
 CONFIG_DEVICE_Y_SCALING_FACTOR = "y_scaling_factor"
