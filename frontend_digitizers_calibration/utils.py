@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-
+from collections import OrderedDict
 
 from epics import caput
 
@@ -19,7 +19,7 @@ def load_ioc_host_config(config_folder, config_file_name):
         exit()
 
     with open(config_file_path, 'r') as config_file:
-        configuration = json.load(config_file)
+        configuration = json.load(config_file, object_pairs_hook=OrderedDict)
         _logger.info("Configuration file '%s' loaded.", config_file_path)
 
     if len(configuration.keys()) > 1:
@@ -75,3 +75,12 @@ def notify_epics(data_to_send):
         caput(name, value)
 
 
+def append_message_data(message, destination):
+    """
+    Append the data from the original bsread message to the destination dictionary.
+    :param message: Original bsread message to parse.
+    :param destination: Destination dictionary - where to copy the data to.
+    :return:
+    """
+    for value_name, bsread_value in message.data.data.items():
+        destination[value_name] = bsread_value.value
