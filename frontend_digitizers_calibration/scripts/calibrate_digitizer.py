@@ -2,19 +2,10 @@ import argparse
 import logging
 
 from frontend_digitizers_calibration import config
-from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
-from frontend_digitizers_calibration.processing import process_pbps
-from frontend_digitizers_calibration.utils import start_stream
+from frontend_digitizers_calibration.processing import process
+from frontend_digitizers_calibration.stream import start_stream
 
 _logger = logging.getLogger(__name__)
-
-# Template to generate PV name
-IOC_PV_TEMPLATE = ':Lnk%dCh%d'
-
-channel_suffixes = {"data": "-DATA",
-                    "bg_data": '-BG-DATA',
-                    "data_trigger": '-DRS_TC',
-                    "bg_data_trigger": '-BG-DRS_TC'}
 
 
 def main():
@@ -37,7 +28,7 @@ def main():
                  config_file=arguments.config_file_name,
                  input_stream_port=config.input_stream_port,
                  output_stream_port=config.output_stream_port,
-                 processing_function=process_pbps)
+                 processing_function=process)
 
 if __name__ == "__main__":
     main()

@@ -7,12 +7,20 @@ CONFIG_SECTION_FREQUENCY_MAPPING = "frequency_mapping"
 CONFIG_SECTION_FREQUENCY = "frequency"
 CONFIG_SECTION_DEVICES = "devices"
 
+# Device property names.
+CONFIG_DEVICE_TYPE = "device_type"
+CONFIG_DEVICE_X_SCALING_FACTOR = "x_scaling_factor"
+CONFIG_DEVICE_X_SCALING_OFFSET = "x_scaling_offset"
+CONFIG_DEVICE_Y_SCALING_FACTOR = "y_scaling_factor"
+CONFIG_DEVICE_Y_SCALING_OFFSET = "y_scaling_offset"
+CONFIG_DEVICE_KEITHLEY_INTENSITY = "keithley_intensity"
+
 # Channel property names.
-CONFIG_CHANNEL_NAME = "channel_name"
+CONFIG_CHANNEL_PV_PREFIX = "pv_prefix"
 CONFIG_CHANNEL_NUMBER = "channel_number"
 CONFIG_CHANNEL_PVS = "channel_pvs"
 
-# Order of channels specified inside each device.
+# Order of channel pv names specified inside each channel.
 CONFIG_CHANNEL_ORDER_DATA = 0
 CONFIG_CHANNEL_ORDER_BG_DATA = 1
 CONFIG_CHANNEL_ORDER_DATA_TRIG = 2
