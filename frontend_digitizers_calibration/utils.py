@@ -5,7 +5,7 @@ import os
 from epics import caput
 
 from frontend_digitizers_calibration import config
-from frontend_digitizers_calibration.drs_vcal_tcal import vcal_class
+from frontend_digitizers_calibration.calibration import VoltageCalibration
 
 _logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def load_calibration_data(sampling_frequency, frequency_files):
         return load_calibration_data.last_loaded_calibration
 
     _logger.debug("Loading calibration file '%s'.", calibration_file_name)
-    calibration_data = vcal_class(calibration_file_name)
+    calibration_data = VoltageCalibration(calibration_file_name)
 
     load_calibration_data.last_loaded_file_name = calibration_file_name
     load_calibration_data.last_loaded_calibration = calibration_data
