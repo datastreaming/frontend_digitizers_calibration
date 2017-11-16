@@ -48,7 +48,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
     _logger.info("Configuration defined frequency_files: %s", frequency_files)
 
     devices = ioc_host_config[config.CONFIG_SECTION_DEVICES]
-    _logger.info("Configuration defined devices: %s", devices)
+    _logger.info("Configuration defined devices: %s", list(devices.keys()))
 
     frequency_value_name = ioc_host_config[config.CONFIG_SECTION_FREQUENCY]
     _logger.info("Configuration defines frequency value name '%s'.", frequency_value_name)
