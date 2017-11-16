@@ -6,9 +6,9 @@ SUFFIX_CHANNEL_DATA_SUM = "-DATA-SUM"
 SUFFIX_CHANNEL_BG_DATA_SUM = "-BG-DATA-SUM"
 SUFFIX_CHANNEL_DATA_CALIBRATED = "-DATA-CALIBRATED"
 SUFFIX_CHANNEL_BG_DATA_CALIBRATED = "-BG-DATA-CALIBRATED"
-SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
-SUFFIX_DEVICE_XPOS = "XPOS"
-SUFFIX_DEVICE_YPOS = "YPOS"
+SUFFIX_DEVICE_INTENSITY = "-INTENSITY-CAL"
+SUFFIX_DEVICE_XPOS = "-XPOS"
+SUFFIX_DEVICE_YPOS = "-YPOS"
 
 
 def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names, calibration_data):
@@ -44,10 +44,10 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
 
 def calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition):
 
-    x_scaling_offset = message.data.data[device_definition["x_scaling_offset"]].value
-    y_scaling_offset = message.data.data[device_definition["y_scaling_offset"]].value
-    x_scaling_factor = message.data.data[device_definition["x_scaling_factor"]].value
-    y_scaling_factor = message.data.data[device_definition["y_scaling_factor"]].value
+    x_scaling_offset = device_definition["x_scaling_offset"]
+    y_scaling_offset = device_definition["y_scaling_offset"]
+    x_scaling_factor = device_definition["x_scaling_factor"]
+    y_scaling_factor = device_definition["y_scaling_factor"]
 
     # intensity and position calculations
     channel1_sum = data_to_send[channel_names[0] + SUFFIX_CHANNEL_DATA_SUM]
