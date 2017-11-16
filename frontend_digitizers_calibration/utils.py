@@ -28,7 +28,7 @@ def load_ioc_host_config(config_folder, config_file_name):
                       configuration.keys(), config_file_path)
         exit()
 
-    ioc_host = configuration.keys()[0]
+    ioc_host = list(configuration.keys())[0]
 
     return ioc_host, configuration[ioc_host]
 
