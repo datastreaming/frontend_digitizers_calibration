@@ -1,6 +1,6 @@
 package:
     name: frontend_digitizers_calibration
-    version: 1.1.1
+    version: 1.1.2
 
 source:
     path: ..
