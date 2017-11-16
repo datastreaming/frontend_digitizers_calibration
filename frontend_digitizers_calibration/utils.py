@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 def load_ioc_host_config(config_folder, config_file_name):
 
-    config_file_path = os.path.join(config_folder, config_file_name, ".json")
+    config_file_path = os.path.join(config_folder, config_file_name)
 
     if not os.path.exists(config_file_path):
         _logger.error("Configuration file '%s' does not exist.", config_file_path)
