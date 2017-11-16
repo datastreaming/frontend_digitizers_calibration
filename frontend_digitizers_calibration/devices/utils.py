@@ -2,10 +2,6 @@ import numpy
 
 from frontend_digitizers_calibration import config
 
-# Suffixes to use for appending calculated data.
-from frontend_digitizers_calibration.devices.pbpg import process_pbpg
-from frontend_digitizers_calibration.devices.pbps import process_pbps
-
 SUFFIX_CHANNEL_DATA_SUM = "-DATA-SUM"
 SUFFIX_CHANNEL_BG_DATA_SUM = "-BG-DATA-SUM"
 SUFFIX_CHANNEL_DATA_CALIBRATED = "-DATA-CALIBRATED"
@@ -13,11 +9,6 @@ SUFFIX_CHANNEL_BG_DATA_CALIBRATED = "-BG-DATA-CALIBRATED"
 SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
 SUFFIX_DEVICE_XPOS = "XPOS"
 SUFFIX_DEVICE_YPOS = "YPOS"
-
-device_type_processing_function_mapping = {
-    "pbps": process_pbps,
-    "pbpg": process_pbpg
-}
 
 
 def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names, calibration_data):

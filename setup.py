@@ -7,5 +7,6 @@ setup(name="frontend_digitizers_calibration",
       license="GPL3",
       packages=['frontend_digitizers_calibration',
                 'frontend_digitizers_calibration.devices',
+                'frontend_digitizers_calibration.devices.utils'
                 'frontend_digitizers_calibration.scripts'],
       )
