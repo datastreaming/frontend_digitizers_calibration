@@ -83,6 +83,47 @@ git clone https://git.psi.ch/controls_highlevel_applications/frontend_digitizers
 And later, when you start the docker container, map the configuration using the **-v** parameter of the docker 
 executable.
 
-## Production deployment
+## Deploy in production
 
-TODO: WRITE how to deploy in production.
+Before deploying in production, make sure the latest version was tagged in git (this triggers the Travis build) and 
+that the Travis build completed successfully (the new frontend_digitizers_calibration package in available in anaconda). 
+After this 2 steps, you need to build the new version of the docker image (the docker image checks out the latest 
+version of frontend_digitizers_calibration from Anaconda). 
+The docker image version and the frontend_digitizers_calibration version should always match - 
+If they don't, something went wrong.
+
+### Production configuration
+Login to the target system, where frontend_digitizers_calibration will be running. Checkout the production configuration 
+into the **/git/** folder of on target system filesystem.
+
+```bash
+cd /
+mkdir git
+cd git
+git clone https://git.psi.ch/controls_highlevel_applications/frontend_digitizers_calibration_configuration.git
+```
+
+### Setup the frontend_digitizers_calibration as a service
+On the target system, copy all **docker/\*.service** files into 
+**/etc/systemd/system**.
+
+Then you need to reload the systemctl daemon:
+```bash
+systemctl daemon-reload
+```
+
+### Run the servers
+Using systemctl you then run all the services:
+```bash
+systemctl start [name_of_the_service_file_1].service
+systemctl start [name_of_the_service_file_2].service
+...
+```
+
+### Inspecting server logs
+To inspect the logs for each server, use journalctl:
+```bash
+journalctl -u [name_of_the_service_file_1].service -f
+```
+
+Note: The '-f' flag will make you follow the log file.
