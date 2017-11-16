@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/datastreaming/frontend_digitizers_calibration.svg?branch=master)][![Build status](https://ci.appveyor.com/api/projects/status/tigeg1p1wi90aruy?svg=true)](https://ci.appveyor.com/project/Babicaa/frontend-digitizers-calibration)]
+[![Build Status](https://travis-ci.org/datastreaming/frontend_digitizers_calibration.svg?branch=master)](https://travis-ci.org/datastreaming/frontend_digitizers_calibration) [![Build status](https://ci.appveyor.com/api/projects/status/tigeg1p1wi90aruy?svg=true)](https://ci.appveyor.com/project/Babicaa/frontend-digitizers-calibration)
 
 # Frontend digitizers calibration
 This library is meant to be a stream device for calibration of digitizers channels.
