@@ -1,12 +1,14 @@
 import unittest
 
 # Patch the notify epics method. It needs to happen before 'import process_pbps'
-from frontend_digitizers_calibration.devices.utils import SUFFIX_CHANNEL_DATA_SUM, SUFFIX_CHANNEL_BG_DATA_SUM, \
-    SUFFIX_CHANNEL_DATA_CALIBRATED, SUFFIX_CHANNEL_BG_DATA_CALIBRATED, SUFFIX_DEVICE_INTENSITY, SUFFIX_DEVICE_XPOS, \
-    SUFFIX_DEVICE_YPOS
 from tests.utils import mock_notify_epics, generate_test_message, generate_test_channels_definition
 import frontend_digitizers_calibration.utils
 frontend_digitizers_calibration.utils.notify_epics = mock_notify_epics
+
+
+from frontend_digitizers_calibration.devices.utils import SUFFIX_CHANNEL_DATA_SUM, SUFFIX_CHANNEL_BG_DATA_SUM, \
+    SUFFIX_CHANNEL_DATA_CALIBRATED, SUFFIX_CHANNEL_BG_DATA_CALIBRATED, SUFFIX_DEVICE_INTENSITY, SUFFIX_DEVICE_XPOS, \
+    SUFFIX_DEVICE_YPOS
 
 from frontend_digitizers_calibration.devices.pbps import process_pbps
 from tests.utils import MockCalibrationData
