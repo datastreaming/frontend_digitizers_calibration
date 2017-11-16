@@ -22,7 +22,7 @@ class TestPbps(unittest.TestCase):
         message = generate_test_message(n_channels)
         channels_definition = generate_test_channels_definition(n_channels)
 
-        device_name = "test_device"
+        device_name = "test_device-"
 
         device_definition = {"device_type": "pbpg",
                              "x_scaling_offset": 0,

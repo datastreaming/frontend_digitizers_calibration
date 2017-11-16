@@ -29,7 +29,7 @@ class TestPbpg(unittest.TestCase):
 
         message.data.data[keithley_intensity_name] = Value(1)
 
-        device_name = "test_device"
+        device_name = "test_device-"
 
         device_definition = {"device_type": "pbpg",
                              "x_scaling_offset": 0,
