@@ -5,8 +5,8 @@ from frontend_digitizers_calibration.devices.utils import calibrate_channel, cal
     SUFFIX_DEVICE_INTENSITY
 from frontend_digitizers_calibration.utils import notify_epics
 
-SUFFIX_DEVICE_INTENSITY_AVG = "-INTENSITY-AVG"
-SUFFIX_DEVICE_INTENSITY_CAL = "-INTENSITY-CAL"
+SUFFIX_DEVICE_INTENSITY_AVG = "INTENSITY-AVG"
+SUFFIX_DEVICE_INTENSITY_CAL = "INTENSITY-CAL"
 
 pbpg_queue = deque(maxlen=240)
 
