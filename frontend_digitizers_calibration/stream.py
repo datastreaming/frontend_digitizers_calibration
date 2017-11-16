@@ -4,7 +4,7 @@ from bsread import source
 from bsread.sender import sender
 
 from frontend_digitizers_calibration import config
-from frontend_digitizers_calibration.devices.utils import device_type_processing_function_mapping
+from frontend_digitizers_calibration.devices.mapping import device_type_processing_function_mapping
 from frontend_digitizers_calibration.utils import load_ioc_host_config, load_frequency_mapping, append_message_data, \
     load_calibration_data
 
