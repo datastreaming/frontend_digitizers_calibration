@@ -25,8 +25,8 @@ def main():
 
     start_stream(config_folder=arguments.config_folder,
                  config_file=arguments.config_file_name,
-                 input_stream_port=config.input_stream_port,
-                 output_stream_port=config.output_stream_port)
+                 input_stream_port=arguments.input_stream_port,
+                 output_stream_port=arguments.output_stream_port)
 
 if __name__ == "__main__":
     main()
