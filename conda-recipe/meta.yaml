@@ -1,6 +1,6 @@
 package:
     name: frontend_digitizers_calibration
-    version: 1.1.0
+    version: 1.1.1
 
 source:
     path: ..
@@ -22,4 +22,4 @@ build:
     - calibrate_digitizer = frontend_digitizers_calibration.scripts.calibrate_digitizer:main
 
 about:
-    home: https://git.psi.ch/controls_highlevel_applications/frontend_digitizers_calibration 
+    home: https://github.com/datastreaming/frontend_digitizers_calibration
