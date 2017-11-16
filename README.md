@@ -1,6 +1,6 @@
 
 # Frontend digitizers calibration
-This library is meant to be a stream device to calibrate digitizers channels.
+This library is meant to be a stream device for calibration of digitizers channels.
 
 ## Conda setup
 If you use conda, you can create an environment with the frontend_digitizers_calibration library by running:
@@ -112,7 +112,7 @@ Then you need to reload the systemctl daemon:
 systemctl daemon-reload
 ```
 
-### Run the servers
+### Run the services
 Using systemctl you then run all the services:
 ```bash
 systemctl start [name_of_the_service_file_1].service
@@ -120,7 +120,7 @@ systemctl start [name_of_the_service_file_2].service
 ...
 ```
 
-### Inspecting server logs
+### Inspecting service logs
 To inspect the logs for each server, use journalctl:
 ```bash
 journalctl -u [name_of_the_service_file_1].service -f
