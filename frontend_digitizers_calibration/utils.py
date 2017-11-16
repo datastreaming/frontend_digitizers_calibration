@@ -95,4 +95,5 @@ def append_message_data(message, destination):
     :return:
     """
     for value_name, bsread_value in message.data.data.items():
+        _logger.debug("Passing parameter '%s' with value '%s' to output stream.", value_name, bsread_value.value)
         destination[value_name] = bsread_value.value
