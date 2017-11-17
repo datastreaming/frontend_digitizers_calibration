@@ -7,6 +7,7 @@ from frontend_digitizers_calibration.utils import notify_epics
 
 SUFFIX_DEVICE_INTENSITY_AVG = "INTENSITY-AVG"
 SUFFIX_DEVICE_INTENSITY_CAL = "INTENSITY-CAL"
+SUFFIX_DEVICE_INTENSITY = "INTENSITY"
 
 pbpg_queue = deque(maxlen=240)
 
@@ -34,6 +35,7 @@ def process_pbpg(message, device_name, device_definition, channels_definition, c
 
     # Retrieve intensity for more calculations.
     intensity = data_to_send[device_name + SUFFIX_DEVICE_INTENSITY]
+    data_to_send[device_name + SUFFIX_DEVICE_INTENSITY] = intensity
 
     pbpg_queue.append(intensity)
     # average last 240 intensities
