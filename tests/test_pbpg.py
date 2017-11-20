@@ -7,7 +7,8 @@ frontend_digitizers_calibration.utils.notify_epics = mock_notify_epics
 
 from bsread.handlers.compact import Value
 
-from frontend_digitizers_calibration.devices.pbpg import SUFFIX_DEVICE_INTENSITY_AVG, SUFFIX_DEVICE_INTENSITY_CAL
+from frontend_digitizers_calibration.devices.pbpg import SUFFIX_DEVICE_INTENSITY_AVG, SUFFIX_DEVICE_INTENSITY_CAL, \
+    SUFFIX_DEVICE_INTENSITY_PBPG
 from frontend_digitizers_calibration.devices.utils import SUFFIX_CHANNEL_DATA_SUM, SUFFIX_CHANNEL_BG_DATA_SUM, \
     SUFFIX_CHANNEL_DATA_CALIBRATED, SUFFIX_CHANNEL_BG_DATA_CALIBRATED, SUFFIX_DEVICE_INTENSITY, SUFFIX_DEVICE_XPOS, \
     SUFFIX_DEVICE_YPOS
@@ -56,5 +57,6 @@ class TestPbpg(unittest.TestCase):
         expected_data.add(device_name+SUFFIX_DEVICE_YPOS)
         expected_data.add(device_name+SUFFIX_DEVICE_INTENSITY_AVG)
         expected_data.add(device_name+SUFFIX_DEVICE_INTENSITY_CAL)
+        expected_data.add(device_name+SUFFIX_DEVICE_INTENSITY_PBPG)
 
         self.assertSetEqual(expected_data, set(result.keys()))
