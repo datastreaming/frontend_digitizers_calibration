@@ -10,12 +10,10 @@ def process_single_channel(message, device_name, device_definition, channels_def
 
     scaling_offset = device_definition["scaling_offset"]
     scaling_factor = device_definition["scaling_factor"]
-    pv_prefix = None
 
     data_to_send = {}
 
     for channel in channels_definition:
-        nonlocal pv_prefix
         pv_prefix = channel[config.CONFIG_CHANNEL_PV_PREFIX]
         channel_number = channel[config.CONFIG_CHANNEL_NUMBER]
         pv_names = channel[config.CONFIG_CHANNEL_PVS]
@@ -26,6 +24,9 @@ def process_single_channel(message, device_name, device_definition, channels_def
                           channel_number=channel_number,
                           pv_names=pv_names,
                           calibration_data=calibration_data)
+
+    if not pv_prefix:
+        raise ValueError("pv_prefix not available - are channels defined for device '%s'?" % device_name)
 
     # The data sum for the single channel should be scaled.
     data_sum = data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_SUM]
