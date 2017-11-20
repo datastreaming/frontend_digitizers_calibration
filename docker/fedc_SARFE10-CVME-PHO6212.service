@@ -1,0 +1,16 @@
+[Unit]
+Description=frontend_digitizers_calibration service
+After=docker.service
+Requires=docker.service
+
+[Install]
+WantedBy=default.target
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill fedc_SARFE10-CVME-PHO6212
+ExecStartPre=-/usr/bin/docker rm fedc_SARFE10-CVME-PHO6212
+ExecStartPre=/usr/bin/docker pull docker.psi.ch:5000/frontend_digitizers_calibration
+ExecStart=/usr/bin/docker run --name fedc_SARFE10-CVME-PHO6212 --net=host --env-file /etc/fedc_environment -v /git/frontend_digitizers_calibration_configuration:/configuration docker.psi.ch:5000/frontend_digitizers_calibration calibrate_digitizer SARFE10-CVME-PHO6212.json --output_stream_port 9999
+ExecStop=/usr/bin/docker stop fedc_SARFE10-CVME-PHO6212
+Restart=always
