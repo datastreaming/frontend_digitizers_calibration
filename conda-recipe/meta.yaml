@@ -1,6 +1,6 @@
 package:
     name: frontend_digitizers_calibration
-    version: 1.1.6
+    version: 1.1.7
 
 source:
     path: ..
@@ -15,7 +15,7 @@ requirements:
     run:
         - python
         - mflow >=0.0.26
-        - bsread >=0.9.12
+        - bsread >=0.9.13
         - pyepics
 
 build:
