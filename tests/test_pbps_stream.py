@@ -50,6 +50,8 @@ class TestPbpsStream(unittest.TestCase):
         with source(host="0.0.0.0", mode=PULL) as input_stream:
             raw_message = input_stream.receive()
             raw_data = raw_message.data.data
+            raw_global_timestamp = raw_message.data.global_timestamp
+            raw_global_timestamp_offset = raw_message.data.global_timestamp_offset
 
         self.reply_dump()
 
@@ -66,11 +68,23 @@ class TestPbpsStream(unittest.TestCase):
         with source(host="0.0.0.0", port=10000, mode=PULL) as input_stream:
             calculated_message = input_stream.receive()
             calculated_data = calculated_message.data.data
+            calculated_global_timestamp = calculated_message.data.global_timestamp
+            calculated_global_timestamp_offset = calculated_message.data.global_timestamp_offset
+
+        # Check if the message timestamps are the same.
+        self.assertEqual(raw_global_timestamp, calculated_global_timestamp)
+        self.assertEqual(raw_global_timestamp_offset, calculated_global_timestamp_offset)
 
         # Verify if all the input data is also in the output, and that the data is equal.
         for key_name in raw_data.keys():
             raw_value = raw_data[key_name].value
             calculated_value = calculated_data[key_name].value
+            received_channel_timestamp = calculated_data[key_name].timestamp
+            received_channel_timestamp_offset = calculated_data[key_name].timestamp_offset
+
+            # The message timestamp is propagated as the channel timestamp for all channels.
+            self.assertEqual(received_channel_timestamp, raw_global_timestamp)
+            self.assertEqual(received_channel_timestamp_offset, raw_global_timestamp_offset)
 
             # Use numpy comparison for ndarray types.
             if isinstance(raw_value, numpy.ndarray):
