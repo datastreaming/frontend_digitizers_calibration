@@ -116,8 +116,10 @@ class VoltageCalibration(object):
 
         # gain calibration
         msk_gtz = data > 0  # create boolean mask vector for selection
-        data[msk_gtz] /= self.unrolled_wf_gain1[channel][trigger_cell][msk_gtz]
-        data[~msk_gtz] /= self.unrolled_wf_gain2[channel][trigger_cell][~msk_gtz]
+
+        gain_correction = np.copy(self.unrolled_wf_gain2[channel][trigger_cell])
+        gain_correction[msk_gtz] = self.unrolled_wf_gain1[channel][trigger_cell][msk_gtz]
+        data /= gain_correction
 
         return data
 

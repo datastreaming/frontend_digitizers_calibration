@@ -14,7 +14,7 @@ def main():
     except ImportError:
         return
 
-    n_measurements = 1
+    n_measurements = 10
 
     message = generate_test_message(WD_N_CHANNELS)
     data = message.data.data["channel1_prefix-DATA"].value

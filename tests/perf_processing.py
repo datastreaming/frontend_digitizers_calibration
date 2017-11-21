@@ -20,7 +20,7 @@ def main():
         return
 
     n_channels = 4
-    n_measurements = 1000
+    n_measurements = 10000
     current_folder = os.path.dirname(os.path.abspath(__file__))
 
     message = generate_test_message(n_channels)
@@ -38,6 +38,7 @@ def main():
     profiler = LineProfiler()
     process_pbps_wrapper = profiler(process_pbps)
     profiler.add_function(calibrate_channel)
+    profiler.add_function(calibration_data.calibrate)
 
     for _ in range(n_measurements):
         process_pbps_wrapper(message, device_name, device_definition, channels_definition, calibration_data)
