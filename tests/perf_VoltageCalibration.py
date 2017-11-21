@@ -2,8 +2,6 @@ import os
 
 import time
 
-import sys
-
 from frontend_digitizers_calibration.calibration import VoltageCalibration, WD_N_CHANNELS, WD_N_CELLS
 from tests.utils import generate_test_message
 
