@@ -1,5 +1,3 @@
-#!/bin/env python
-
 import os
 import ctypes
 import numpy as np
@@ -38,6 +36,27 @@ class VoltageCalibration(object):
         else:
             self.valid = self.load(filename)
 
+    def unroll_calibration(self, n_channels=WD_N_CHANNELS, max_offset=WD_N_CELLS):
+        self.unrolled_wf_offset1 = []
+        self.unrolled_wf_gain1 = []
+        self.unrolled_wf_gain2 = []
+
+        # For each channel.
+        for channel_number in range(n_channels):
+            channel_wf_offset1 = []
+            channel_wf_gain1 = []
+            channel_wf_gain2 = []
+
+            # For each offset.
+            for offset_number in range(max_offset):
+                channel_wf_offset1.append(np.roll(self.wf_offset1[channel_number], -offset_number))
+                channel_wf_gain1.append(np.roll(self.wf_gain1[channel_number], -offset_number))
+                channel_wf_gain2.append(np.roll(self.wf_gain2[channel_number], -offset_number))
+
+            self.unrolled_wf_offset1.append(channel_wf_offset1)
+            self.unrolled_wf_gain1.append(channel_wf_gain1)
+            self.unrolled_wf_gain2.append(channel_wf_gain2)
+
     def load(self, filename):
         # check file size
         if os.path.getsize(filename) != ctypes.sizeof(self.VoltageCalibrationBinaryData):
@@ -68,6 +87,8 @@ class VoltageCalibration(object):
         self.adc_offset_range1 = np.ctypeslib.as_array(cbd.adc_offset_range1)
         self.adc_offset_range2 = np.ctypeslib.as_array(cbd.adc_offset_range2)
 
+        self.unroll_calibration()
+
         return True
 
     def dump(self):
@@ -83,19 +104,20 @@ class VoltageCalibration(object):
         for ch in range(WD_N_CHANNELS - 2):
             print("ch %2d :  %.6f  %.6f  %.6f  %.6f  %.6f  %.6f" % (
                 ch, self.drs_offset_range0[ch], self.drs_offset_range1[ch], self.drs_offset_range2[ch],
-                self.adc_offset_range0[ch], self.adc_offset_range1[ch], self.adc_offset_range2[ch]));
+                self.adc_offset_range0[ch], self.adc_offset_range1[ch], self.adc_offset_range2[ch]))
 
     def calibrate(self, data, trigger_cell, channel):
+
         # cell-by-cell offset calibration
-        data -= np.roll(self.wf_offset1[channel], -trigger_cell)
+        data -= self.unrolled_wf_offset1[channel][trigger_cell]
 
         # start-to-end offset calibration
         data -= self.wf_offset2[channel]
 
         # gain calibration
         msk_gtz = data > 0  # create boolean mask vector for selection
-        data[msk_gtz] /= np.roll(self.wf_gain1[channel], -trigger_cell)[msk_gtz]
-        data[~msk_gtz] /= np.roll(self.wf_gain2[channel], -trigger_cell)[~msk_gtz]
+        data[msk_gtz] /= self.unrolled_wf_gain1[channel][trigger_cell][msk_gtz]
+        data[~msk_gtz] /= self.unrolled_wf_gain2[channel][trigger_cell][~msk_gtz]
 
         return data
 
