@@ -3,6 +3,9 @@ DEFAULT_CONFIG_FOLDER = "/configuration"
 DEFAULT_INPUT_STREAM_PORT = 9999
 DEFAULT_OUTPUT_STREAM_PORT = 9999
 
+# This should be enough for 10 seconds of processing - 1 second for each file change.
+INPUT_STREAM_QUEUE_SIZE = 1000
+
 # Configuration section names.
 CONFIG_SECTION_FREQUENCY_MAPPING = "frequency_mapping"
 CONFIG_SECTION_FREQUENCY = "frequency"

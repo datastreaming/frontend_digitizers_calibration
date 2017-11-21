@@ -55,7 +55,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
     _logger.info("Configuration defines frequency value name '%s'.", frequency_value_name)
 
     try:
-        with source(host=ioc_host, port=input_stream_port) as input_stream:
+        with source(host=ioc_host, port=input_stream_port, queue_size=config.INPUT_STREAM_QUEUE_SIZE) as input_stream:
             with sender(port=output_stream_port) as output_stream:
                 while True:
                     message = input_stream.receive()
