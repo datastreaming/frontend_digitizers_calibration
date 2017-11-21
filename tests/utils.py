@@ -1,3 +1,5 @@
+import random
+
 import numpy
 from bsread.handlers.compact import Message, Value
 
@@ -16,12 +18,15 @@ def generate_test_message(n_channels):
     message = Message()
     message.data.data = {}
 
-    for i in range(1, n_channels+1):
-        message.data.data["channel%d_prefix-DATA" % i] = Value(numpy.ones(shape=(512, 1024)))
-        message.data.data["channel%d_prefix-BG-DATA" % i] = Value(numpy.zeros(shape=(512, 1024)))
-        message.data.data["channel%d_prefix-DRS_TC" % i] = Value(1)
-        message.data.data["channel%d_prefix-BG-DRS_TC" % i] = Value(1)
-        message.data.data["channel%d_prefix-WD-gain-RBa" % i] = Value(1)
+    for i in range(1, n_channels + 1):
+        data_values = random.sample(list(range(1800, 2100))*20, 1024)
+        background_data_values = random.sample(list(range(1900, 2000))*20, 1024)
+
+        message.data.data["channel%d_prefix-DATA" % i] = Value(numpy.array(data_values, dtype=">i2"))
+        message.data.data["channel%d_prefix-BG-DATA" % i] = Value(numpy.array(background_data_values, dtype=">i2"))
+        message.data.data["channel%d_prefix-DRS_TC" % i] = Value(134)
+        message.data.data["channel%d_prefix-BG-DRS_TC" % i] = Value(112)
+        message.data.data["channel%d_prefix-WD-gain-RBa" % i] = Value(145)
 
     return message
 
