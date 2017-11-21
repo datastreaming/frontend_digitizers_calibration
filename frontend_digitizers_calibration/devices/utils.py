@@ -21,8 +21,8 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     background_trigger_cell = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_BG_DATA_TRIG]].value
 
     # Offset and scale
-    background = (background.astype(numpy.float32) - 0x800) / 4096
-    data = (data.astype(numpy.float32) - 0x800) / 4096
+    background = (background.astype(numpy.float32) - 2048) / 4096
+    data = (data.astype(numpy.float32) - 2048) / 4096
 
     # Calibrate
     background = calibration_data.calibrate(background, background_trigger_cell, channel_number)
