@@ -20,7 +20,7 @@ from frontend_digitizers_calibration.stream import start_stream
 class TestPbpsStream(unittest.TestCase):
     def setUp(self):
         current_folder = os.path.dirname(os.path.abspath(__file__))
-        self.dump_folder = os.path.join(current_folder, "data/SAROP21-CVME-PBPS1_ioc_dump/")
+        self.dump_folder = os.path.join(current_folder, "data/SAROP21-CVME-PBPS2_ioc_dump/")
         self.config_folder = os.path.join(current_folder, "data/configs/")
 
         self.stream_process = None
@@ -57,7 +57,7 @@ class TestPbpsStream(unittest.TestCase):
 
         def process_stream():
             start_stream(config_folder=self.config_folder,
-                         config_file="test_SAROP21-CVME-PBPS1.json",
+                         config_file="test_SAROP21-CVME-PBPS2.json",
                          input_stream_port=9999,
                          output_stream_port=10000)
 

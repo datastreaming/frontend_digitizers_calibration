@@ -1,0 +1,81 @@
+{
+  "localhost":
+  {
+    "frequency_mapping":
+    {
+      "5120": "wd136-5120.vcal"
+    },
+
+    "temperature": "SAROP21-CVME-PBPS2:Lnk9-TEMP-STATUS",
+    "frequency": "SAROP21-CVME-PBPS2:Lnk9Ch15-WD_FREQ",
+
+    "devices":{
+      "SAROP21-PBPS138:": {
+        "device_type": "pbps",
+        "x_scaling_offset": 0,
+        "y_scaling_offset": 0,
+        "x_scaling_factor": 1,
+        "y_scaling_factor": 1,
+        "channels": [
+          {
+            "pv_prefix": "SAROP21-CVME-PBPS2:Lnk9Ch15",
+            "channel_number": 15,
+            "channel_pvs":["SAROP21-CVME-PBPS2:Lnk9Ch15-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch15-BG-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch15-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch15-BG-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch15-WD-gain-RBa"
+                          ]
+          },
+          {
+            "pv_prefix": "SAROP21-CVME-PBPS2:Lnk9Ch14",
+            "channel_number": 14,
+            "channel_pvs":["SAROP21-CVME-PBPS2:Lnk9Ch14-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch14-BG-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch14-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch14-BG-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch14-WD-gain-RBa"
+                          ]
+          },
+          {
+            "pv_prefix": "SAROP21-CVME-PBPS2:Lnk9Ch13",
+            "channel_number": 13,
+            "channel_pvs":["SAROP21-CVME-PBPS2:Lnk9Ch13-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch13-BG-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch13-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch13-BG-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch13-WD-gain-RBa"
+                          ]
+          },
+          {
+            "pv_prefix": "SAROP21-CVME-PBPS2:Lnk9Ch12",
+            "channel_number": 12,
+            "channel_pvs":["SAROP21-CVME-PBPS2:Lnk9Ch12-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch12-BG-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch12-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch12-BG-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch12-WD-gain-RBa"
+                          ]
+          }
+        ]
+      },
+      "SAROP21-PIPS:": {
+        "device_type": "single_channel",
+        "scaling_offset": 0,
+        "scaling_factor": 1,
+        "channels": [
+          {
+            "pv_prefix": "SAROP21-CVME-PBPS2:Lnk9Ch7",
+            "channel_number": 7,
+            "channel_pvs":["SAROP21-CVME-PBPS2:Lnk9Ch7-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch7-BG-DATA",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch7-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch7-BG-DRS_TC",
+                           "SAROP21-CVME-PBPS2:Lnk9Ch7-WD-gain-RBa"
+                          ]
+          }
+        ]
+      }
+    }
+  }
+}
