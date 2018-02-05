@@ -106,7 +106,7 @@ channel_from_stream = 7
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 
-calibration = VoltageCalibration(os.path.join(current_folder, "wd136-5120.vcal"))
+calibration = VoltageCalibration(os.path.join(current_folder, "data/configs/wd136-5120.vcal"))
 
 recalibrated_data = np.array(raw_value_from_stream)
 recalibrated_data = (recalibrated_data.astype(np.float32) - 2048) / 4096
