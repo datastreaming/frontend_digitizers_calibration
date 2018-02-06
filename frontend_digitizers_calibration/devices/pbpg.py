@@ -11,6 +11,29 @@ SUFFIX_DEVICE_INTENSITY_PBPG = "INTENSITY"
 
 pbpg_queue = deque(maxlen=240)
 
+# Gain setting is epics enum (DBF_ENUM). Only the integer value of the enum is passed on in the stream.
+# The same gain setting can be achieved with different gain configurations, this is why some gains
+# are listed twice. Faktor C1 from the table is used: Vin = Vcalib * C1
+
+VOLTAGE_GAIN_MAPPING_PBPG = {
+    0: 2.8481E-01,     # 0 -18 dB
+    1: 1.4275E-01,     # 1 -12 dB
+    2: 7.1542E-02,     # 2 -6 dB
+    3: 3.5856E-02,     # 3 0 dB
+    4: 2.8481E-02,     # 4 +2 dB
+    5: 1.4275E-02,     # 5 +8 dB
+    6: 7.1542E-03,     # 6 +14 dB
+    7: 3.5856E-03,     # 7 +20 dB
+    8: 2.8481E-03,     # 8 +22 dB
+    9: 1.4275E-03,     # 9 +28 dB
+    10: 7.1542E-04,    # 10 +34 dB
+    11: 3.5856E-04,    # 11 +40 dB
+    12: 7.1542E-02,    # 12 +2 dB
+    13: 1.4275E-02,    # 13 +8 dB
+    14: 7.1542E-03,    # 14 +14 dB
+    15: 3.5856E-03     # 15 +20 dB
+}
+
 
 def process_pbpg(message, device_name, device_definition, channels_definition, calibration_data):
 
@@ -26,7 +49,8 @@ def process_pbpg(message, device_name, device_definition, channels_definition, c
                           pv_prefix=pv_prefix,
                           channel_number=channel_number,
                           pv_names=pv_names,
-                          calibration_data=calibration_data)
+                          calibration_data=calibration_data,
+                          gain_mapping=VOLTAGE_GAIN_MAPPING_PBPG)
 
     # Retrieve the channel names in the correct order.
     channel_names = [channel[config.CONFIG_CHANNEL_PV_PREFIX] for channel in channels_definition]
