@@ -26,7 +26,7 @@ def generate_test_message(n_channels):
         message.data.data["channel%d_prefix-BG-DATA" % i] = Value(numpy.array(background_data_values, dtype=">i2"))
         message.data.data["channel%d_prefix-DRS_TC" % i] = Value(134)
         message.data.data["channel%d_prefix-BG-DRS_TC" % i] = Value(112)
-        message.data.data["channel%d_prefix-WD-gain-RBa" % i] = Value(145)
+        message.data.data["channel%d_prefix-WD-gain-RBa" % i] = Value(3)
 
     return message
 
