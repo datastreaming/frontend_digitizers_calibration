@@ -1,6 +1,6 @@
 package:
     name: frontend_digitizers_calibration
-    version: 1.2.4
+    version: 1.2.3
 
 source:
     path: ..
@@ -14,7 +14,6 @@ requirements:
 
     run:
         - python
-        - pyzmq <=16.0.1
         - mflow >=0.0.26
         - bsread >=0.9.13
         - pyepics
@@ -25,3 +24,4 @@ build:
 
 about:
     home: https://github.com/datastreaming/frontend_digitizers_calibration
+y
