@@ -51,14 +51,21 @@ def load_frequency_mapping(ioc_host_config, config_folder):
 def load_calibration_data(sampling_frequency, frequency_files):
 
     if sampling_frequency not in frequency_files:
-        _logger.error("No calibration file found for frequency '%s'.", sampling_frequency)
-        exit()
+        _logger.debug("No calibration file found for frequency '%s'.", sampling_frequency)
+        if sampling_frequency != load_calibration_data.last_sampling_frequency:
+            _logger.info("No calibration file found for frequency '%s'.", sampling_frequency)
+        load_calibration_data.last_sampling_frequency = sampling_frequency
+        return None
 
     calibration_file_name = frequency_files[sampling_frequency]
     if not os.path.exists(calibration_file_name):
-        _logger.error("The specified calibration file '%s' for frequency '%s' does not exist.",
+        _logger.debug("The specified calibration file '%s' for frequency '%s' does not exist.",
                       calibration_file_name, sampling_frequency)
-        exit()
+        if sampling_frequency != load_calibration_data.last_sampling_frequency:
+            _logger.info("The specified calibration file '%s' for frequency '%s' does not exist.",
+                         calibration_file_name, sampling_frequency)
+        load_calibration_data.last_sampling_frequency = sampling_frequency
+        return None
 
     # Check if we already have this calibration file loaded.
     if calibration_file_name == load_calibration_data.last_loaded_file_name:
@@ -69,12 +76,15 @@ def load_calibration_data(sampling_frequency, frequency_files):
 
     load_calibration_data.last_loaded_file_name = calibration_file_name
     load_calibration_data.last_loaded_calibration = calibration_data
+    load_calibration_data.last_sampling_frequency = sampling_frequency
 
     return calibration_data
+
 
 # Store info about last loaded calibration file.
 load_calibration_data.last_loaded_file_name = None
 load_calibration_data.last_loaded_calibration = None
+load_calibration_data.last_sampling_frequency = None
 
 
 def notify_epics(data_to_send):

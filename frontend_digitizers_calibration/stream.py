@@ -15,6 +15,9 @@ def process_message(message, devices, frequency_value_name, frequency_files):
     sampling_frequency = message.data.data[frequency_value_name].value
     calibration_data = load_calibration_data(sampling_frequency, frequency_files)
 
+    if calibration_data is None:
+        return None
+
     _logger.debug("Sampling frequency '%s'.", sampling_frequency)
 
     data_to_send = {}
@@ -66,6 +69,9 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
                                            devices=devices,
                                            frequency_value_name=frequency_value_name,
                                            frequency_files=frequency_files)
+                    if data is None:
+                        _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
+                        continue
 
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 
