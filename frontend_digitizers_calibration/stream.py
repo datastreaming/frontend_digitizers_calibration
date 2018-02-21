@@ -48,7 +48,7 @@ def no_client_function():
         _logger.info("No clients connected")
 
 
-def start_stream(config_folder, config_file, input_stream_port, output_stream_port):
+def start_stream(config_folder, config_file, input_stream_port, output_stream_port, non_blocking=False):
     ioc_host, ioc_host_config = load_ioc_host_config(config_folder=config_folder, config_file_name=config_file)
     _logger.info("Configuration defines ioc_host '%s'.", ioc_host)
 
@@ -63,7 +63,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
     try:
         with source(host=ioc_host, port=input_stream_port, queue_size=config.INPUT_STREAM_QUEUE_SIZE) as input_stream:
-            with sender(port=output_stream_port, block=False) as output_stream:
+            with sender(port=output_stream_port, block=(not non_blocking)) as output_stream:
                 while True:
                     message = input_stream.receive()
 
