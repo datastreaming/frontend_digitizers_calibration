@@ -1,11 +1,16 @@
 import numpy
 
 from frontend_digitizers_calibration import config
+from frontend_digitizers_calibration.smooth_minmax import find_minmax
 
 SUFFIX_CHANNEL_DATA_SUM = "-DATA-SUM"
 SUFFIX_CHANNEL_BG_DATA_SUM = "-BG-DATA-SUM"
 SUFFIX_CHANNEL_DATA_CALIBRATED = "-DATA-CALIBRATED"
 SUFFIX_CHANNEL_BG_DATA_CALIBRATED = "-BG-DATA-CALIBRATED"
+SUFFIX_CHANNEL_DATA_MIN = "-DATA-MIN"
+SUFFIX_CHANNEL_DATA_MAX = "-DATA-MAX"
+SUFFIX_CHANNEL_BG_DATA_MIN = "-BG-DATA-MIN"
+SUFFIX_CHANNEL_BG_DATA_MAX = "-BG-DATA-MAX"
 
 SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
 SUFFIX_DEVICE_XPOS = "XPOS"
@@ -65,10 +70,18 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     data_sum = data.sum()
     background_sum = background.sum()
 
+    # min max
+    [min, max] = find_minmax(data)
+    [bg_min, bg_max] = find_minmax(background)
+
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_SUM] = data_sum
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_SUM] = background_sum
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_CALIBRATED] = data
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_CALIBRATED] = background
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MIN] = min
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MAX] = max
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MIN] = bg_min
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MAX] = bg_max
 
     return data_to_send
 

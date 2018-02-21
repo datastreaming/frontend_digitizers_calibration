@@ -44,6 +44,10 @@ def process_message(message, devices, frequency_value_name, frequency_files):
     return data_to_send
 
 
+def no_client_function():
+        _logger.info("No clients connected")
+
+
 def start_stream(config_folder, config_file, input_stream_port, output_stream_port):
     ioc_host, ioc_host_config = load_ioc_host_config(config_folder=config_folder, config_file_name=config_file)
     _logger.info("Configuration defines ioc_host '%s'.", ioc_host)
@@ -59,7 +63,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
     try:
         with source(host=ioc_host, port=input_stream_port, queue_size=config.INPUT_STREAM_QUEUE_SIZE) as input_stream:
-            with sender(port=output_stream_port) as output_stream:
+            with sender(port=output_stream_port, block=False) as output_stream:
                 while True:
                     message = input_stream.receive()
 
@@ -79,7 +83,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
                                        pulse_id=message.data.pulse_id,
                                        data=data)
 
-                    _logger.debug("Message with pulse_id '%s' sent out.", message.data.pulse_id)
+                    _logger.debug("Message with pulse_id '%s' sent out, if someone is listening", message.data.pulse_id)
 
     except KeyboardInterrupt:
         _logger.info("Terminating due to user request.")

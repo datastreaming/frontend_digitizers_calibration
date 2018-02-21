@@ -94,7 +94,7 @@ def notify_epics(data_to_send):
     """
     for name, value in data_to_send.items():
         _logger.debug("Setting epics channel '%s' to value '%s'.", name, value)
-        caput(name, value)
+        caput(name, value, timeout=1)
 
 
 def append_message_data(message, destination):
