@@ -86,7 +86,8 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     return data_to_send
 
 
-def calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition):
+def calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition,
+                                     intensity_scaling_factor=1):
 
     x_scaling_offset = device_definition["x_scaling_offset"]
     y_scaling_offset = device_definition["y_scaling_offset"]
@@ -99,7 +100,7 @@ def calculate_intensity_and_position(message, data_to_send, channel_names, devic
     channel3_sum = data_to_send[channel_names[2] + SUFFIX_CHANNEL_DATA_SUM]
     channel4_sum = data_to_send[channel_names[3] + SUFFIX_CHANNEL_DATA_SUM]
 
-    intensity = (channel1_sum + channel2_sum + channel3_sum + channel4_sum) / 2
+    intensity = (channel1_sum + channel2_sum + channel3_sum + channel4_sum) * intensity_scaling_factor
     intensity = abs(intensity)
 
     x_position = ((channel1_sum - channel2_sum) / (channel1_sum + channel2_sum))

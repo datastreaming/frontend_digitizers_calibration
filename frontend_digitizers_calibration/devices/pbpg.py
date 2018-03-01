@@ -55,7 +55,8 @@ def process_pbpg(message, device_name, device_definition, channels_definition, c
     # Retrieve the channel names in the correct order.
     channel_names = [channel[config.CONFIG_CHANNEL_PV_PREFIX] for channel in channels_definition]
 
-    calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition)
+    calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition,
+                                     intensity_scaling_factor=0.5)
 
     # Retrieve intensity for more calculations.
     intensity = data_to_send[device_name + SUFFIX_DEVICE_INTENSITY]

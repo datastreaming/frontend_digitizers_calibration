@@ -8,7 +8,8 @@ frontend_digitizers_calibration.utils.notify_epics = mock_notify_epics
 
 from frontend_digitizers_calibration.devices.utils import SUFFIX_CHANNEL_DATA_SUM, SUFFIX_CHANNEL_BG_DATA_SUM, \
     SUFFIX_CHANNEL_DATA_CALIBRATED, SUFFIX_CHANNEL_BG_DATA_CALIBRATED, SUFFIX_DEVICE_INTENSITY, SUFFIX_DEVICE_XPOS, \
-    SUFFIX_DEVICE_YPOS
+    SUFFIX_DEVICE_YPOS, SUFFIX_CHANNEL_DATA_MIN, SUFFIX_CHANNEL_DATA_MAX, SUFFIX_CHANNEL_BG_DATA_MIN, \
+    SUFFIX_CHANNEL_BG_DATA_MAX
 
 from frontend_digitizers_calibration.devices.pbps import process_pbps
 from tests.utils import MockCalibrationData
@@ -41,6 +42,10 @@ class TestPbps(unittest.TestCase):
             expected_data.add(pv_prefix + SUFFIX_CHANNEL_BG_DATA_SUM)
             expected_data.add(pv_prefix + SUFFIX_CHANNEL_DATA_CALIBRATED)
             expected_data.add(pv_prefix + SUFFIX_CHANNEL_BG_DATA_CALIBRATED)
+            expected_data.add(pv_prefix + SUFFIX_CHANNEL_DATA_MIN)
+            expected_data.add(pv_prefix + SUFFIX_CHANNEL_DATA_MAX)
+            expected_data.add(pv_prefix + SUFFIX_CHANNEL_BG_DATA_MIN)
+            expected_data.add(pv_prefix + SUFFIX_CHANNEL_BG_DATA_MAX)
 
         # Per device data.
         expected_data.add(device_name+SUFFIX_DEVICE_INTENSITY)
