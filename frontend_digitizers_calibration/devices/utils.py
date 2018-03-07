@@ -11,6 +11,8 @@ SUFFIX_CHANNEL_DATA_MIN = "-DATA-MIN"
 SUFFIX_CHANNEL_DATA_MAX = "-DATA-MAX"
 SUFFIX_CHANNEL_BG_DATA_MIN = "-BG-DATA-MIN"
 SUFFIX_CHANNEL_BG_DATA_MAX = "-BG-DATA-MAX"
+SUFFIX_CHANNEL_TIME_AXIS = "-TIME-AXIS"
+SUFFIX_CHANNEL_BG_TIME_AXIS = "-BG-TIME-AXIS"
 
 SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
 SUFFIX_DEVICE_XPOS = "XPOS"
@@ -56,8 +58,10 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     data = (data.astype(numpy.float32) - 2048) / 4096
 
     # Calibrate
-    background = calibration_data.calibrate(background, background_trigger_cell, channel_number)
-    data = calibration_data.calibrate(data, data_trigger_cell, channel_number)
+    (vcal, tcal) = calibration_data
+
+    background = vcal.calibrate(background, background_trigger_cell, channel_number)
+    data = vcal.calibrate(data, data_trigger_cell, channel_number)
 
     # reverse gain
     background *= gain_mapping[gain_setting]
@@ -82,6 +86,10 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MAX] = max
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MIN] = bg_min
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MAX] = bg_max
+
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_TIME_AXIS] = tcal.get_time_axis(data_trigger_cell, channel_number)
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_TIME_AXIS] = tcal.get_time_axis(background_trigger_cell, channel_number)
+
 
     return data_to_send
 

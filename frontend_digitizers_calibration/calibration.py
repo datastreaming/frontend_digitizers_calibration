@@ -146,6 +146,21 @@ class TimeCalibration(object):
         else:
             self.valid = self.load(filename)
 
+    def unroll_calibration(self, n_channels=WD_N_CHANNELS, max_offset=WD_N_CELLS):
+        # will contain a list of nd arrays holding time axis in ns [channel][trigger_cell][sample]
+        self.unrolled_time_ns=[]
+
+        # For each channel.
+        for channel_number in range(n_channels):
+            channel_unrolled_time = []
+
+            # For each offset.
+            for trigger_cell in range(max_offset):
+                channel_unrolled_time.append((self.time[channel_number][trigger_cell:trigger_cell+max_offset]
+                                             - self.time[channel_number][trigger_cell])*1e9)
+
+            self.unrolled_time_ns.append(channel_unrolled_time)
+
     def load(self, filename):
         # check file size
         if os.path.getsize(filename) != ctypes.sizeof(self.TimeCalibrationBinaryData):
@@ -169,11 +184,28 @@ class TimeCalibration(object):
         self.period = np.ctypeslib.as_array(cbd.period)
         self.offset = np.ctypeslib.as_array(cbd.offset)
 
+        # bulid integrated time vector t
+        # variant 1 : iterations
+        #   self.t = np.zeros([WD_N_CHANNELS, 2047], dtype='float32')
+        #   for ch in range(WD_N_CHANNELS):
+        #     for i in range(1,WD_N_CELLS*2-1):
+        #        self.t[ch][i] = self.t[ch][i-1] + self.dt[ch][(i-1)%WD_N_CELLS]
+
         # variant 2 : with numpy functions instead of iterations:
-        dt_zero_pad_tile = np.pad(np.tile(self.dt, 2)[:, :-2], [(0, 0), (1, 0)], mode='constant')
-        self.t = np.cumsum(dt_zero_pad_tile, axis=1)
+        # make an copy of an array of dts (axis 1) and append it to the original one, remove last element
+        dt_zero_pad_tile = np.tile(self.dt, 2)[:, :-1]
+        # prepend an element of with 0 at the beginning of each array (axis 1)
+        dt_zero_pad_tile = np.pad(dt_zero_pad_tile, [(0, 0), (1, 0)], mode='constant')
+        # calculate running time with the cumulative sum along axis 1
+        # time now contains time axis starting from cell 0
+        self.time = np.cumsum(dt_zero_pad_tile, axis=1)
+
+        self.unroll_calibration()
 
         return True
+
+    def get_time_axis(self, trigger_cell, channel):
+        return self.unrolled_time_ns[channel][trigger_cell]
 
     def dump(self):
         print("Timing Cal Version %-4s  CRC=0x%08x  Freq: %.0f  Temperature %.2f deg. C" % (
@@ -181,8 +213,8 @@ class TimeCalibration(object):
 
         for ch in range(WD_N_CHANNELS):
             for cell in range(1024):
-                print("ch %2d - cell %4d :  dt: %10.6f ns  period: %10.6f ns" % (
-                    ch, cell, self.dt[ch][cell] * 1e9, self.period[ch][cell] * 1e9))
+                print("ch %2d - cell %4d :  dt: %10.6f ns  period: %10.6f ns, t: %10.6f" % (
+                    ch, cell, self.dt[ch][cell] * 1e9, self.period[ch][cell] * 1e9, self.t[ch][cell] * 1e9))
 
         for ch in range(WD_N_CHANNELS):
             print("ch %2d :  offset: %10.6f ns" % (ch, self.offset[ch] * 1e9))

@@ -8,6 +8,7 @@ INPUT_STREAM_QUEUE_SIZE = 1000
 
 # Configuration section names.
 CONFIG_SECTION_FREQUENCY_MAPPING = "frequency_mapping"
+CONFIG_SECTION_TIME_FREQUENCY_MAPPING = "time_calibration_frequency_mapping"
 CONFIG_SECTION_FREQUENCY = "frequency"
 CONFIG_SECTION_DEVICES = "devices"
 

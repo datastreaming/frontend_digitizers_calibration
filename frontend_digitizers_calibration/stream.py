@@ -6,14 +6,14 @@ from bsread.sender import sender
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.mapping import device_type_processing_function_mapping
 from frontend_digitizers_calibration.utils import load_ioc_host_config, load_frequency_mapping, append_message_data, \
-    load_calibration_data
+    load_calibration_data, load_time_calib_freq_mapping
 
 _logger = logging.getLogger(__name__)
 
 
-def process_message(message, devices, frequency_value_name, frequency_files):
+def process_message(message, devices, frequency_value_name, frequency_files, time_calib_files):
     sampling_frequency = message.data.data[frequency_value_name].value
-    calibration_data = load_calibration_data(sampling_frequency, frequency_files)
+    calibration_data = load_calibration_data(sampling_frequency, frequency_files, time_calib_files)
 
     if calibration_data is None:
         return None
@@ -54,6 +54,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
     frequency_files = load_frequency_mapping(ioc_host_config=ioc_host_config, config_folder=config_folder)
     _logger.info("Configuration defined frequency_files: %s", frequency_files)
+    time_calib_files=load_time_calib_freq_mapping(ioc_host_config=ioc_host_config, config_folder=config_folder)
 
     devices = ioc_host_config[config.CONFIG_SECTION_DEVICES]
     _logger.info("Configuration defined devices: %s", list(devices.keys()))
@@ -72,7 +73,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
                     data = process_message(message=message,
                                            devices=devices,
                                            frequency_value_name=frequency_value_name,
-                                           frequency_files=frequency_files)
+                                           frequency_files=frequency_files, time_calib_files=time_calib_files)
                     if data is None:
                         _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
                         continue
