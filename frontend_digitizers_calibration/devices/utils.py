@@ -57,11 +57,8 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     background = (background.astype(numpy.float32) - 2048) / 4096
     data = (data.astype(numpy.float32) - 2048) / 4096
 
-    # Calibrate
-    (vcal, tcal) = calibration_data
-
-    background = vcal.calibrate(background, background_trigger_cell, channel_number)
-    data = vcal.calibrate(data, data_trigger_cell, channel_number)
+    background = calibration_data.vcal.calibrate(background, background_trigger_cell, channel_number)
+    data = calibration_data.vcal.calibrate(data, data_trigger_cell, channel_number)
 
     # reverse gain
     background *= gain_mapping[gain_setting]
@@ -87,8 +84,10 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MIN] = bg_min
     data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MAX] = bg_max
 
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_TIME_AXIS] = tcal.get_time_axis(data_trigger_cell, channel_number)
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_TIME_AXIS] = tcal.get_time_axis(background_trigger_cell, channel_number)
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_TIME_AXIS] = \
+        calibration_data.tcal.get_time_axis(data_trigger_cell, channel_number)
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_TIME_AXIS] = \
+        calibration_data.tcal.get_time_axis(background_trigger_cell, channel_number)
 
 
     return data_to_send

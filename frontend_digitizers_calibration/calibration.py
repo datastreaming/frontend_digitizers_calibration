@@ -1,10 +1,13 @@
 import os
 import ctypes
 import numpy as np
+from frontend_digitizers_calibration import config
+import logging
 
 WD_N_CHANNELS = 18
 WD_N_CELLS = 1024
 
+_logger = logging.getLogger(__name__)
 
 class VoltageCalibration(object):
     """
@@ -146,6 +149,12 @@ class TimeCalibration(object):
         else:
             self.valid = self.load(filename)
 
+    def load_default(self, frequency_MHz):
+        # just calculate time axis from the period of the sampling frequency
+        dt_zero_pad_tile = np.full((WD_N_CHANNELS, WD_N_CELLS*2), 1 / (frequency_MHz*1e6), dtype='float32')
+        self.time = np.cumsum(dt_zero_pad_tile, axis=1)
+        self.unroll_calibration()
+
     def unroll_calibration(self, n_channels=WD_N_CHANNELS, max_offset=WD_N_CELLS):
         # will contain a list of nd arrays holding time axis in ns [channel][trigger_cell][sample]
         self.unrolled_time_ns=[]
@@ -218,3 +227,96 @@ class TimeCalibration(object):
 
         for ch in range(WD_N_CHANNELS):
             print("ch %2d :  offset: %10.6f ns" % (ch, self.offset[ch] * 1e9))
+
+
+class CalibrationManager(object):
+
+    def __init__(self, ioc_host_config, config_folder):
+        self.vcal = VoltageCalibration()
+        self.tcal = TimeCalibration()
+        self.vcal_found = False
+        self.tcal_found = False
+
+        self.vcal_files = CalibrationManager.load_frequency_mapping(ioc_host_config, config_folder,
+                                                                    config.CONFIG_SECTION_FREQUENCY_MAPPING)
+        self.tcal_files = CalibrationManager.load_frequency_mapping(ioc_host_config, config_folder,
+                                                                    config.CONFIG_SECTION_TIME_FREQUENCY_MAPPING)
+
+        self.last_sampling_frequency = 0
+
+    def load_calibration_data(self, sampling_frequency):
+        tcal_file_name = ""
+        vcal_file_name = ""
+
+        # Check if we already have this calibration file loaded.
+        if sampling_frequency != self.last_sampling_frequency:
+
+            if sampling_frequency not in self.vcal_files:
+                _logger.debug("No calibration file found for frequency '%s'.", sampling_frequency)
+                self.vcal_found = False
+                if sampling_frequency != self.last_sampling_frequency:
+                    _logger.info("No calibration file found for frequency '%s'.", sampling_frequency)
+                self.last_sampling_frequency = sampling_frequency
+            else:
+                vcal_file_name = self.vcal_files[sampling_frequency]
+                if not os.path.exists(vcal_file_name):
+                    self.vcal_found = False
+                    _logger.debug("The specified calibration file '%s' for frequency '%s' does not exist.",
+                                  vcal_file_name, sampling_frequency)
+                    if sampling_frequency != self.last_sampling_frequency:
+                        _logger.info("The specified calibration file '%s' for frequency '%s' does not exist.",
+                                     vcal_file_name, sampling_frequency)
+                    self.last_sampling_frequency = sampling_frequency
+                else:
+                    self.vcal_found = True
+
+            # time calibration
+
+            if sampling_frequency not in self.tcal_files:
+                self.tcal_found = False
+                _logger.debug("No time calibration file found for frequency '%s'.", sampling_frequency)
+                if sampling_frequency != self.last_sampling_frequency:
+                    _logger.info("No time calibration file found for frequency '%s'.", sampling_frequency)
+
+            else:
+                tcal_file_name = self.tcal_files[sampling_frequency]
+                if not os.path.exists(tcal_file_name):
+                    self.tcal_found = False
+                    _logger.debug("The specified time calibration file '%s' for frequency '%s' does not exist.",
+                                  tcal_file_name, sampling_frequency)
+                    if sampling_frequency != self.last_sampling_frequency:
+                        _logger.info("The specified time calibration file '%s' for frequency '%s' does not exist.",
+                                     tcal_file_name, sampling_frequency)
+                else:
+                    self.tcal_found = True
+
+            if self.tcal_found:
+                _logger.debug("Loading calibration file '%s'.", tcal_file_name)
+                self.tcal.load(tcal_file_name)
+            else:
+                _logger.info("Loading default time axis for '%s'.", sampling_frequency)
+                self.tcal.load_default(sampling_frequency)
+
+            if self.vcal_found:
+                _logger.debug("Loading calibration file '%s'.", vcal_file_name)
+                self.vcal.load(vcal_file_name)
+
+        self.last_sampling_frequency = sampling_frequency
+        return self.vcal_found
+
+
+
+    @staticmethod
+    def load_frequency_mapping(ioc_host_config, config_folder, config_section):
+        frequency_map = ioc_host_config[config_section]
+
+        frequency_files = {}
+
+        # Convert the frequency string and relative path to an int and absolute path.
+        for frequency, relative_file_path in frequency_map.items():
+            actual_frequency = int(frequency)
+            abs_file_path = os.path.join(config_folder, relative_file_path)
+
+            frequency_files[actual_frequency] = abs_file_path
+
+        return frequency_files

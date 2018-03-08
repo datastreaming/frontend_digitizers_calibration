@@ -5,17 +5,16 @@ from bsread.sender import sender
 
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.mapping import device_type_processing_function_mapping
-from frontend_digitizers_calibration.utils import load_ioc_host_config, load_frequency_mapping, append_message_data, \
-    load_calibration_data, load_time_calib_freq_mapping
+from frontend_digitizers_calibration.utils import load_ioc_host_config, append_message_data
+from frontend_digitizers_calibration.calibration import CalibrationManager
 
 _logger = logging.getLogger(__name__)
 
 
-def process_message(message, devices, frequency_value_name, frequency_files, time_calib_files):
+def process_message(message, devices, frequency_value_name, calibration_manager):
     sampling_frequency = message.data.data[frequency_value_name].value
-    calibration_data = load_calibration_data(sampling_frequency, frequency_files, time_calib_files)
 
-    if calibration_data is None:
+    if not calibration_manager.load_calibration_data(sampling_frequency):
         return None
 
     _logger.debug("Sampling frequency '%s'.", sampling_frequency)
@@ -34,7 +33,7 @@ def process_message(message, devices, frequency_value_name, frequency_files, tim
                                              device_name=device_name,
                                              device_definition=device_definition,
                                              channels_definition=channels_definition,
-                                             calibration_data=calibration_data)
+                                             calibration_data=calibration_manager)
 
         data_to_send.update(processed_data)
 
@@ -52,9 +51,9 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
     ioc_host, ioc_host_config = load_ioc_host_config(config_folder=config_folder, config_file_name=config_file)
     _logger.info("Configuration defines ioc_host '%s'.", ioc_host)
 
-    frequency_files = load_frequency_mapping(ioc_host_config=ioc_host_config, config_folder=config_folder)
-    _logger.info("Configuration defined frequency_files: %s", frequency_files)
-    time_calib_files=load_time_calib_freq_mapping(ioc_host_config=ioc_host_config, config_folder=config_folder)
+    CM = CalibrationManager(ioc_host_config, config_folder)
+    _logger.info("Configuration defined frequency_files: %s", CM.vcal_files)
+    _logger.info("Configuration defined frequency_files: %s", CM.tcal_files)
 
     devices = ioc_host_config[config.CONFIG_SECTION_DEVICES]
     _logger.info("Configuration defined devices: %s", list(devices.keys()))
@@ -73,7 +72,7 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
                     data = process_message(message=message,
                                            devices=devices,
                                            frequency_value_name=frequency_value_name,
-                                           frequency_files=frequency_files, time_calib_files=time_calib_files)
+                                           calibration_manager=CM)
                     if data is None:
                         _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
                         continue
