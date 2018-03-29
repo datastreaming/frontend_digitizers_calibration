@@ -3,6 +3,9 @@ import numpy
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.smooth_minmax import find_minmax
 
+SUFFIX_CHANNEL_DATA = "-DATA"
+SUFFIX_CHANNEL_DATA_TRIGGER = "-DRS_TC"
+SUFFIX_CHANNEL_WD_GAIN = "-WD-gain-RBa"
 SUFFIX_CHANNEL_DATA_SUM = "-DATA-SUM"
 SUFFIX_CHANNEL_BG_DATA_SUM = "-BG-DATA-SUM"
 SUFFIX_CHANNEL_DATA_CALIBRATED = "-DATA-CALIBRATED"
@@ -13,6 +16,11 @@ SUFFIX_CHANNEL_BG_DATA_MIN = "-BG-DATA-MIN"
 SUFFIX_CHANNEL_BG_DATA_MAX = "-BG-DATA-MAX"
 SUFFIX_CHANNEL_TIME_AXIS = "-TIME-AXIS"
 SUFFIX_CHANNEL_BG_TIME_AXIS = "-BG-TIME-AXIS"
+SUFFIX_CHANNEL_ROI_SIG_START = "-ROI_sig_min"
+SUFFIX_CHANNEL_ROI_SIG_END = "-ROI_sig_max"
+SUFFIX_CHANNEL_ROI_BG_START = "-ROI_bg_min"
+SUFFIX_CHANNEL_ROI_BG_END = "-ROI_bg_max"
+
 
 SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
 SUFFIX_DEVICE_XPOS = "XPOS"
@@ -43,52 +51,46 @@ VOLTAGE_GAIN_MAPPING_PDIM = {
 }
 
 
-def calibrate_channel(message, data_to_send, pv_prefix, channel_number, pv_names, calibration_data,
+def calibrate_channel(message, data_to_send, pv_prefix, channel_number, calibration_data,
                       gain_mapping=VOLTAGE_GAIN_MAPPING_PDIM):
 
     # Read from bsread message.
-    data = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_DATA]].value
-    background = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_BG_DATA]].value
-    data_trigger_cell = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_DATA_TRIG]].value
-    background_trigger_cell = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_BG_DATA_TRIG]].value
-    gain_setting = message.data.data[pv_names[config.CONFIG_CHANNEL_ORDER_WD_GAIN]].value
+    data = message.data.data[pv_prefix+SUFFIX_CHANNEL_DATA].value
+    data_trigger_cell = message.data.data[pv_prefix+SUFFIX_CHANNEL_DATA_TRIGGER].value
+    gain_setting = message.data.data[pv_prefix+SUFFIX_CHANNEL_WD_GAIN].value
+
+    # make roi include the end point [start, end]
+    signal_roi = slice(message.data.data[pv_prefix + SUFFIX_CHANNEL_ROI_SIG_START].value,
+                  message.data.data[pv_prefix + SUFFIX_CHANNEL_ROI_SIG_END].value + 1)
+    background_roi = slice(message.data.data[pv_prefix + SUFFIX_CHANNEL_ROI_BG_START].value,
+                  message.data.data[pv_prefix + SUFFIX_CHANNEL_ROI_BG_END].value + 1)
 
     # Offset and scale
-    background = (background.astype(numpy.float32) - 2048) / 4096
     data = (data.astype(numpy.float32) - 2048) / 4096
 
-    background = calibration_data.vcal.calibrate(background, background_trigger_cell, channel_number)
     data = calibration_data.vcal.calibrate(data, data_trigger_cell, channel_number)
 
     # reverse gain
-    background *= gain_mapping[gain_setting]
     data *= gain_mapping[gain_setting]
 
-    # background subtraction
-    data -= background
+    # baseline subtraction
+    background = data[background_roi]
+    base_line = numpy.average(background)
+    data -= base_line
 
     # integration
-    data_sum = data.sum()
-    background_sum = background.sum()
+    data_sum = data[signal_roi].sum()
 
     # min max
     [min, max] = find_minmax(data)
-    [bg_min, bg_max] = find_minmax(background)
 
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_SUM] = data_sum
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_SUM] = background_sum
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_CALIBRATED] = data
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_CALIBRATED] = background
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MIN] = min
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MAX] = max
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MIN] = bg_min
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_DATA_MAX] = bg_max
 
     data_to_send[pv_prefix + SUFFIX_CHANNEL_TIME_AXIS] = \
         calibration_data.tcal.get_time_axis(data_trigger_cell, channel_number)
-    data_to_send[pv_prefix + SUFFIX_CHANNEL_BG_TIME_AXIS] = \
-        calibration_data.tcal.get_time_axis(background_trigger_cell, channel_number)
-
 
     return data_to_send
 
@@ -113,7 +115,7 @@ def calculate_intensity_and_position(message, data_to_send, channel_names, devic
     x_position = ((channel1_sum - channel2_sum) / (channel1_sum + channel2_sum))
     y_position = ((channel3_sum - channel4_sum) / (channel3_sum + channel4_sum))
 
-    # Scaling.
+    # Scaling
     x_position = (x_position * x_scaling_factor) + x_scaling_offset
     y_position = (y_position * y_scaling_factor) + y_scaling_offset
 

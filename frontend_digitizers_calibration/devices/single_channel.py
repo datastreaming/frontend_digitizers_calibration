@@ -16,13 +16,12 @@ def process_single_channel(message, device_name, device_definition, channels_def
     for channel in channels_definition:
         pv_prefix = channel[config.CONFIG_CHANNEL_PV_PREFIX]
         channel_number = channel[config.CONFIG_CHANNEL_NUMBER]
-        pv_names = channel[config.CONFIG_CHANNEL_PVS]
+        # pv_names = channel[config.CONFIG_CHANNEL_PVS]
 
         calibrate_channel(message=message,
                           data_to_send=data_to_send,
                           pv_prefix=pv_prefix,
                           channel_number=channel_number,
-                          pv_names=pv_names,
                           calibration_data=calibration_data)
 
     if not pv_prefix:
