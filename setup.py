@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="frontend_digitizers_calibration",
-      version="2.0.0",
+      version="2.0.3",
       author="Paul Scherrer Institute",
       description="Arturo will fill this out.",
       license="GPL3",

@@ -23,6 +23,8 @@ SUFFIX_CHANNEL_ROI_BG_END = "-ROI_bg_max"
 
 
 SUFFIX_DEVICE_INTENSITY = "INTENSITY-CAL"
+SUFFIX_X_INTENSITY = "INTENSITY-X"
+SUFFIX_Y_INTENSITY = "INTENSITY-Y"
 SUFFIX_DEVICE_XPOS = "XPOS"
 SUFFIX_DEVICE_YPOS = "YPOS"
 
@@ -112,6 +114,9 @@ def calculate_intensity_and_position(message, data_to_send, channel_names, devic
     intensity = (channel1_sum + channel2_sum + channel3_sum + channel4_sum) * intensity_scaling_factor
     intensity = abs(intensity)
 
+    x_intensity = abs(channel1_sum + channel2_sum)
+    y_intensity = abs(channel3_sum + channel4_sum)
+
     x_position = ((channel1_sum - channel2_sum) / (channel1_sum + channel2_sum))
     y_position = ((channel3_sum - channel4_sum) / (channel3_sum + channel4_sum))
 
@@ -120,5 +125,7 @@ def calculate_intensity_and_position(message, data_to_send, channel_names, devic
     y_position = (y_position * y_scaling_factor) + y_scaling_offset
 
     data_to_send[device_name + SUFFIX_DEVICE_INTENSITY] = intensity
+    data_to_send[device_name + SUFFIX_X_INTENSITY] = x_intensity
+    data_to_send[device_name + SUFFIX_Y_INTENSITY] = y_intensity
     data_to_send[device_name + SUFFIX_DEVICE_XPOS] = x_position
     data_to_send[device_name + SUFFIX_DEVICE_YPOS] = y_position
