@@ -2,12 +2,13 @@ import json
 import logging
 import os
 
-from epics import caput
+from epics import PV, caput
 
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.calibration import *
 
 _logger = logging.getLogger(__name__)
+_PVs = {}
 
 
 def load_ioc_host_config(config_folder, config_file_name):
@@ -32,6 +33,18 @@ def load_ioc_host_config(config_folder, config_file_name):
     return ioc_host, configuration[ioc_host]
 
 
+def pv_connection_callback(pvname, conn, **kws):
+    """
+    Notify about pv connection status
+    :param pvname: PV_name
+    :param conn: bool, connection status
+    """
+    if conn:
+        _logger.info("PV '%s' is now connected", pvname)
+    else:
+        _logger.info("PV '%s' is disconnected", pvname)
+
+
 def notify_epics(data_to_send):
     """
     Notify epics channels from the data.
@@ -39,7 +52,12 @@ def notify_epics(data_to_send):
     """
     for name, value in data_to_send.items():
         _logger.debug("Setting epics channel '%s' to value '%s'.", name, value)
-        caput(name, value, timeout=1)
+        if name not in _PVs:
+            _PVs[name] = PV(name, connection_callback=pv_connection_callback)
+
+        _PVs[name].put(value)
+
+
 
 
 def append_message_data(message, destination):
