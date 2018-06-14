@@ -7,6 +7,7 @@ SUFFIX_CHANNEL_DATA = "-DATA"
 SUFFIX_CHANNEL_DATA_TRIGGER = "-DRS_TC"
 SUFFIX_CHANNEL_WD_GAIN = "-WD-gain-RBa"
 SUFFIX_CHANNEL_DATA_SUM = "-DATA-SUM"
+SUFFIX_CHANNEL_DATA_AMP = "-DATA-AMP"
 SUFFIX_CHANNEL_BG_DATA_SUM = "-BG-DATA-SUM"
 SUFFIX_CHANNEL_DATA_CALIBRATED = "-DATA-CALIBRATED"
 SUFFIX_CHANNEL_BG_DATA_CALIBRATED = "-BG-DATA-CALIBRATED"
@@ -90,6 +91,7 @@ def calibrate_channel(message, data_to_send, pv_prefix, channel_number, calibrat
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_CALIBRATED] = data
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MIN] = min
     data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_MAX] = max
+    data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_AMP] = max - min
 
     data_to_send[pv_prefix + SUFFIX_CHANNEL_TIME_AXIS] = \
         calibration_data.tcal.get_time_axis(data_trigger_cell, channel_number)
