@@ -1,6 +1,5 @@
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.utils import calibrate_channel, SUFFIX_CHANNEL_DATA_SUM
-from frontend_digitizers_calibration.utils import notify_epics
 
 
 SUFFIX_DEVICE_SCALED_DATA_SUM = "SCALED-DATA-SUM"
@@ -31,8 +30,5 @@ def process_single_channel(message, device_name, device_definition, channels_def
     data_sum = data_to_send[pv_prefix + SUFFIX_CHANNEL_DATA_SUM]
     scaled_data_sum = (data_sum * scaling_factor) + scaling_offset
     data_to_send[device_name + SUFFIX_DEVICE_SCALED_DATA_SUM] = scaled_data_sum
-
-    # Notify EPICS channels with the new calculated data.
-    notify_epics(data_to_send)
 
     return data_to_send

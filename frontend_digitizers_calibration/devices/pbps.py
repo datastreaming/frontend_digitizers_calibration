@@ -1,7 +1,6 @@
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.utils import calibrate_channel, \
     calculate_intensity_and_position
-from frontend_digitizers_calibration.utils import notify_epics
 
 
 def process_pbps(message, device_name, device_definition, channels_definition, calibration_data):
@@ -22,8 +21,5 @@ def process_pbps(message, device_name, device_definition, channels_definition, c
     channel_names = [channel[config.CONFIG_CHANNEL_PV_PREFIX] for channel in channels_definition]
 
     calculate_intensity_and_position(message, data_to_send, channel_names, device_name, device_definition)
-
-    # Notify EPICS channels with the new calculated data.
-    notify_epics(data_to_send)
 
     return data_to_send

@@ -3,7 +3,7 @@ from collections import deque
 from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.utils import calibrate_channel, calculate_intensity_and_position, \
     SUFFIX_DEVICE_INTENSITY
-from frontend_digitizers_calibration.utils import notify_epics
+
 
 SUFFIX_DEVICE_INTENSITY_AVG = "INTENSITY-AVG"
 SUFFIX_DEVICE_INTENSITY_CAL = "INTENSITY-CAL"
@@ -69,8 +69,5 @@ def process_pbpg(message, device_name, device_definition, channels_definition, c
     keithley_intensity = message.data.data[device_definition[config.CONFIG_DEVICE_KEITHLEY_INTENSITY]].value
     intensity_cal = intensity * (keithley_intensity / intensity_average)
     data_to_send[device_name + SUFFIX_DEVICE_INTENSITY_CAL] = intensity_cal
-
-    # Notify EPICS channels with the new calculated data.
-    notify_epics(data_to_send)
 
     return data_to_send

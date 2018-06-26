@@ -7,8 +7,11 @@ from frontend_digitizers_calibration import config
 from frontend_digitizers_calibration.devices.mapping import device_type_processing_function_mapping
 from frontend_digitizers_calibration.utils import load_ioc_host_config, append_message_data
 from frontend_digitizers_calibration.calibration import CalibrationManager
+from frontend_digitizers_calibration.utils import notify_epics
 
 _logger = logging.getLogger(__name__)
+
+SUFFIX_CAPUT_ENABLE = "CAPUT-BOOL"
 
 
 def process_message(message, devices, frequency_value_name, calibration_manager):
@@ -79,6 +82,16 @@ def start_stream(config_folder, config_file, input_stream_port, output_stream_po
 
                     _logger.debug("Message with pulse_id '%s' processed.", message.data.pulse_id)
 
+                    # Notify EPICS channels with the new calculated data.
+                    if ioc_host + ":" + SUFFIX_CAPUT_ENABLE in message.data.data:
+                        if message.data.data[ioc_host + ":" + SUFFIX_CAPUT_ENABLE].value == 1:
+                            notify_epics(data)
+                        else:
+                            _logger.debug("Caput is suppressed", message.data.pulse_id)
+                    else:
+                        notify_epics(data)
+
+                    # send out bsread stream
                     output_stream.send(timestamp=(message.data.global_timestamp, message.data.global_timestamp_offset),
                                        pulse_id=message.data.pulse_id,
                                        data=data)
